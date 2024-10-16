@@ -15,12 +15,14 @@ namespace BaiTapThucTap.Models
         public string ProductName { get; set; }
 
         [Column("Loai_San_Pham_ID")]
+        [Required]
         [ForeignKey(nameof(ProductCategory))]
         public int ProductCategoryId { get; set; } 
 
         public ProductCategory? ProductCategory { get; set; }
 
         [Column("Don_Vi_Tinh_ID")]
+        [Required]
         [ForeignKey(nameof(CalculationUnit))]
         public int CalculationUnitId { get; set; }
 
