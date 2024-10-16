@@ -13,5 +13,20 @@ namespace BaiTapThucTap.Models
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
         [Column("Ten_San_Pham")]
         public string ProductName { get; set; }
+
+        [Column("Loai_San_Pham_ID")]
+        [ForeignKey(nameof(ProductCategory))]
+        public int ProductCategoryId { get; set; } 
+
+        public ProductCategory? ProductCategory { get; set; }
+
+        [Column("Don_Vi_Tinh_ID")]
+        [ForeignKey(nameof(CalculationUnit))]
+        public int CalculationUnitId { get; set; }
+
+        public CalculationUnit? CalculationUnit { get; set; }
+
+        [Column("Ghi_Chu")]
+        public string? Note { get; set; }
     }
 }

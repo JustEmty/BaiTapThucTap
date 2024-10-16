@@ -16,5 +16,7 @@ namespace BaiTapThucTap.Models
 
         [Column("Ghi_Chu")]
         public string? Note { get; set; }
+
+        public ICollection<Product>? Products { get; set; }
     }
 }

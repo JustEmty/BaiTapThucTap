@@ -105,7 +105,7 @@
         {
             await calculationUnitRepository.CreateAsync(CalculationUnit);
             await LoadCalculationUnitList();
-            CalculationUnit = new CalculationUnit();
+            Reset();
             errorMessage = string.Empty;
         }
         catch (DbUpdateException dbUpdateException)
@@ -118,7 +118,7 @@
     {
         await calculationUnitRepository.UpdateAsync(CalculationUnit);
         await LoadCalculationUnitList();
-        CalculationUnit = new CalculationUnit();
+        Reset();
     }
 
     private async Task DeleteCalculationUnit(int id)
@@ -126,7 +126,7 @@
         await LoadCalculationUnit(id);
         await calculationUnitRepository.DeleteAsync(CalculationUnit);
         await LoadCalculationUnitList();
-        CalculationUnit = new CalculationUnit();
+        Reset();
     }
 
     private async Task OnSubmit()

@@ -3,6 +3,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016084831_UpdateProductTable")]
+    partial class UpdateProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace BaiTapThucTap.Migrations
                     b.HasIndex("CalculationUnitName")
                         .IsUnique();
 
-                    b.ToTable("tbl_DM_Don_Vi_Tinh", (string)null);
+                    b.ToTable("tbl_DM_Don_Vi_Tinh");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.Product", b =>
@@ -78,7 +81,7 @@ namespace BaiTapThucTap.Migrations
 
                     b.HasIndex("ProductCategoryId");
 
-                    b.ToTable("tbl_DM_San_Pham", (string)null);
+                    b.ToTable("tbl_DM_San_Pham");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.ProductCategory", b =>
@@ -104,7 +107,7 @@ namespace BaiTapThucTap.Migrations
                     b.HasIndex("ProductCategoryName")
                         .IsUnique();
 
-                    b.ToTable("tbl_DM_Loai_San_Pham", (string)null);
+                    b.ToTable("tbl_DM_Loai_San_Pham");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.Product", b =>

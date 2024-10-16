@@ -40,7 +40,7 @@
                                     <td>@item.Note</td>
                                     <td>
                                         <button class="btn btn-primary" @onclick="()=>LoadProductCategory(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteCalculationUnit(item.Id)">Delete</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteProductCategory(item.Id)">Delete</button>
                                     </td>
                                 </tr>
                             }
@@ -90,12 +90,12 @@
 
         if (firstRender)
         {
-            await LoadProductCategorieList();
+            await LoadProductCategoriesList();
             await InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task LoadProductCategorieList()
+    private async Task LoadProductCategoriesList()
     {
         ProductCategoriesList = await productCategoryRepository.GetAllAsync();
     }
@@ -110,8 +110,8 @@
         try
         {
             await productCategoryRepository.CreateAsync(ProductCategory);
-            await LoadProductCategorieList();
-            ProductCategory = new ProductCategory();
+            await LoadProductCategoriesList();
+            Reset();
             errorMessage = string.Empty;
         }
         catch (DbUpdateException dbUpdateException)
@@ -123,16 +123,16 @@
     private async Task UpdateProductCategory()
     {
         await productCategoryRepository.UpdateAsync(ProductCategory);
-        await LoadProductCategorieList();
-        ProductCategory = new ProductCategory();
+        await LoadProductCategoriesList();
+        Reset();
     }
 
-    private async Task DeleteCalculationUnit(int id)
+    private async Task DeleteProductCategory(int id)
     {
         await LoadProductCategory(id);
         await productCategoryRepository.DeleteAsync(ProductCategory);
-        await LoadProductCategorieList();
-        ProductCategory = new ProductCategory();
+        await LoadProductCategoriesList();
+        Reset();
     }
 
     private async Task OnSubmit()

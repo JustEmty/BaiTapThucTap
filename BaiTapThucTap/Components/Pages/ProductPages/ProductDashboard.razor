@@ -1,0 +1,194 @@
+﻿@page "/product-dashboard"
+@inject IProductRepository productRepository
+@inject IProductCategoryRepository productCategoryRepository
+@inject ICalculationUnitRepository calculationUnitRepository
+
+<h3>Danh mục sản phẩm</h3>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Mã sản phẩm</th>
+                        <th scope="col">Tên sản phẩm</th>
+                        <th scope="col">Loại sản phẩm</th>
+                        <th scope="col">Đơn vị tính</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ProductList is null)
+                    {
+                        <tr>
+                            <td>Đang lấy dữ liệu...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @if (!ProductList.Any())
+                        {
+                            <tr>
+                                <td>Không có dữ liệu</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (Product item in ProductList)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.ProductName</td>
+                                    <td>@ProductCategoriesList.Find(i => i.Id == item.ProductCategoryId).ProductCategoryName</td>
+                                    <td>@CalculationUnitList.Find(i => i.Id == item.CalculationUnitId).CalculationUnitName</td>
+                                    <td>@item.Note</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="()=>LoadProduct(item.Id)">Edit</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteProduct(item.Id)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <EditForm Model="Product" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="productId">Mã sản phẩm</label>
+                    <InputNumber @bind-Value="Product.Id" class="form-control" id="productId" disabled />
+                </div>
+                <div class="form-group">
+                    <label for="calculationUnitName">Tên sản phẩm</label>
+                    <InputText @bind-Value="Product.ProductName" class="form-control" id="calculationUnitName" placeholder="Tên loại sản phẩm..." />
+                    <ValidationMessage For="@(()=>Product.ProductName)" />
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Loại sản phẩm</label>
+                    <InputSelect @bind-Value="Product.ProductCategoryId" class="form-control" id="productCategory">
+                        @if (ProductCategoriesList is not null)
+                        {
+                            @foreach (ProductCategory item in ProductCategoriesList)
+                            {
+                                <option value="@item.Id">@item.ProductCategoryName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Đơn vị tính</label>
+                    <InputSelect @bind-Value="Product.CalculationUnitId" class="form-control" id="productCategory">
+                        @if (CalculationUnitList is not null)
+                        {
+                            @foreach (CalculationUnit item in CalculationUnitList)
+                            {
+                                <option value="@item.Id">@item.CalculationUnitName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="Product.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div> 
+                @if (Product.Id > 0)
+                {
+                    <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
+                }
+                <button type="submit" class="btn btn-primary mt-4">@(Product.Id > 0 ? "Sửa" : "Thêm")</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public Product Product { get; set; } = new Product();
+
+    public List<Product> ProductList { get; set; }
+    public List<ProductCategory> ProductCategoriesList { get; set; }
+    public List<CalculationUnit> CalculationUnitList { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadProductList();
+            await LoadProductCategoryList();
+            await LoadCalculationUnitList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadProductList()
+    {
+        ProductList = await productRepository.GetAllAsync();
+    }
+
+    private async Task LoadProductCategoryList()
+    {
+        ProductCategoriesList = await productCategoryRepository.GetAllAsync();
+    }
+
+    private async Task LoadCalculationUnitList()
+    {
+        CalculationUnitList = await calculationUnitRepository.GetAllAsync();
+    }
+
+    private async Task LoadProduct(int id)
+    {
+        Product = await productRepository.GetAsync(id);
+    }
+
+    private async Task CreateProduct()
+    {
+        await productRepository.CreateAsync(Product);
+        await LoadProductList();
+        Reset();
+    }
+
+    private async Task UpdateProduct()
+    {
+        await productRepository.UpdateAsync(Product);
+        await LoadProductList();
+        Reset();
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        await LoadProduct(id);
+        await productRepository.DeleteAsync(Product);
+        await LoadProductList();
+        Reset();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (Product.Id > 0)
+        {
+            await UpdateProduct();
+        }
+        else
+        {
+            await CreateProduct();
+        }
+    }
+
+    private void Reset()
+    {
+        Product = new Product();
+    }
+}

@@ -3,6 +3,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016084244_Add_FK_Product_ProductCategory")]
+    partial class Add_FK_Product_ProductCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace BaiTapThucTap.Migrations
                     b.HasIndex("CalculationUnitName")
                         .IsUnique();
 
-                    b.ToTable("tbl_DM_Don_Vi_Tinh", (string)null);
+                    b.ToTable("tbl_DM_Don_Vi_Tinh");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.Product", b =>
@@ -54,14 +57,6 @@ namespace BaiTapThucTap.Migrations
                         .HasColumnName("Ma_San_Pham");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculationUnitId")
-                        .HasColumnType("int")
-                        .HasColumnName("Don_Vi_Tinh_ID");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Ghi_Chu");
 
                     b.Property<int>("ProductCategoryId")
                         .HasColumnType("int")
@@ -74,11 +69,9 @@ namespace BaiTapThucTap.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalculationUnitId");
-
                     b.HasIndex("ProductCategoryId");
 
-                    b.ToTable("tbl_DM_San_Pham", (string)null);
+                    b.ToTable("tbl_DM_San_Pham");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.ProductCategory", b =>
@@ -104,31 +97,18 @@ namespace BaiTapThucTap.Migrations
                     b.HasIndex("ProductCategoryName")
                         .IsUnique();
 
-                    b.ToTable("tbl_DM_Loai_San_Pham", (string)null);
+                    b.ToTable("tbl_DM_Loai_San_Pham");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.Product", b =>
                 {
-                    b.HasOne("BaiTapThucTap.Models.CalculationUnit", "CalculationUnit")
-                        .WithMany("Products")
-                        .HasForeignKey("CalculationUnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("BaiTapThucTap.Models.ProductCategory", "ProductCategory")
                         .WithMany("Products")
                         .HasForeignKey("ProductCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CalculationUnit");
-
                     b.Navigation("ProductCategory");
-                });
-
-            modelBuilder.Entity("BaiTapThucTap.Models.CalculationUnit", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.ProductCategory", b =>
