@@ -1,0 +1,142 @@
+﻿@page "/product-category-dashboard"
+@inject IProductCategoryRepository productCategoryRepository
+
+<h3>Danh mục loại sản phẩm</h3>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Mã loại sản phẩm</th>
+                        <th scope="col">Tên loại sản phẩm</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ProductCategoriesList is null)
+                    {
+                        <tr>
+                            <td>Đang lấy dữ liệu...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @if (!ProductCategoriesList.Any())
+                        {
+                            <tr>
+                                <td>Không có dữ liệu</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (ProductCategory item in ProductCategoriesList)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.ProductCategoryName</td>
+                                    <td>@item.Note</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="()=>LoadProductCategory(item.Id)">Edit</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteCalculationUnit(item.Id)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <EditForm Model="ProductCategory" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="productCategoryId">Mã loại sản phẩm</label>
+                    <InputNumber @bind-Value="ProductCategory.Id" class="form-control" id="productCategoryId" disabled />
+                </div>
+                <div class="form-group">
+                    <label for="calculationUnitName">Tên loại sản phẩm</label>
+                    <InputText @bind-Value="ProductCategory.ProductCategoryName" class="form-control" id="calculationUnitName" placeholder="Tên loại sản phẩm..." />
+                    <ValidationMessage For="@(()=>ProductCategory.ProductCategoryName)" />
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="ProductCategory.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div>
+                @if(ProductCategory.Id > 0)
+                {
+                    <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
+                }
+                <button type="submit" class="btn btn-primary mt-4">@(ProductCategory.Id > 0 ? "Sửa" : "Thêm")</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public ProductCategory ProductCategory { get; set; } = new ProductCategory();
+
+    public List<ProductCategory> ProductCategoriesList { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadProductCategorieList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadProductCategorieList()
+    {
+        ProductCategoriesList = await productCategoryRepository.GetAllAsync();
+    }
+
+    private async Task LoadProductCategory(int id)
+    {
+        ProductCategory = await productCategoryRepository.GetAsync(id);
+    }
+
+    private async Task CreateProductCategory()
+    {
+        await productCategoryRepository.CreateAsync(ProductCategory);
+        await LoadProductCategorieList();
+        ProductCategory = new ProductCategory();
+    }
+
+    private async Task UpdateProductCategory()
+    {
+        await productCategoryRepository.UpdateAsync(ProductCategory);
+        await LoadProductCategorieList();
+        ProductCategory = new ProductCategory();
+    }
+
+    private async Task DeleteCalculationUnit(int id)
+    {
+        await LoadProductCategory(id);
+        await productCategoryRepository.DeleteAsync(ProductCategory);
+        await LoadProductCategorieList();
+        ProductCategory = new ProductCategory();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (ProductCategory.Id > 0)
+        {
+            await UpdateProductCategory();
+        }
+        else
+        {
+            await CreateProductCategory();
+        }
+    }
+
+    private void Reset()
+    {
+        ProductCategory = new ProductCategory();
+    }
+}
