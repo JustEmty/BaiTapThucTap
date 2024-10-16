@@ -3,6 +3,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016073138_UpdateUniqueFieldForCalculationUnitName")]
+    partial class UpdateUniqueFieldForCalculationUnitName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,13 +64,10 @@ namespace BaiTapThucTap.Migrations
 
                     b.Property<string>("ProductCategoryName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("Ten_LSP");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductCategoryName")
-                        .IsUnique();
 
                     b.ToTable("tbl_DM_Loai_San_Pham");
                 });

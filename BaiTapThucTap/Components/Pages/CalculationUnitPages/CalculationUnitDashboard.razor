@@ -1,4 +1,5 @@
 ﻿@page "/calculation-unit-dashboard"
+@using Microsoft.EntityFrameworkCore
 @inject ICalculationUnitRepository calculationUnitRepository
 
 <h3>Danh mục đơn vị tính</h3>
@@ -53,6 +54,7 @@
                     <label for="calculationUnitName">Tên đơn vị tính</label>
                     <InputText @bind-Value="CalculationUnit.CalculationUnitName" class="form-control" id="calculationUnitName" placeholder="kg" />
                     <ValidationMessage For="@(()=>CalculationUnit.CalculationUnitName)" />
+                    <p class="text-danger">@errorMessage</p>
                 </div>
                 <div class="form-group">
                     <label for="note">Ghi chú</label>
@@ -73,6 +75,8 @@
     public CalculationUnit CalculationUnit { get; set; } = new CalculationUnit();
 
     public List<CalculationUnit> CalculationUnitList { get; set; }
+
+    private string errorMessage = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -97,9 +101,17 @@
 
     private async Task CreateCalculationUnit()
     {
-        await calculationUnitRepository.CreateAsync(CalculationUnit);
-        await LoadCalculationUnitList();
-        CalculationUnit = new CalculationUnit();
+        try
+        {
+            await calculationUnitRepository.CreateAsync(CalculationUnit);
+            await LoadCalculationUnitList();
+            CalculationUnit = new CalculationUnit();
+            errorMessage = string.Empty;
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            errorMessage = "Tên đơn vị tính phải là duy nhất";
+        }
     }
 
     private async Task UpdateCalculationUnit()

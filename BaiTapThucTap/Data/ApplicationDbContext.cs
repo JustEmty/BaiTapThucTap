@@ -9,5 +9,11 @@ namespace BaiTapThucTap.Data
 
 		public DbSet<CalculationUnit> CalculationUnits { get; set; }
 		public DbSet<ProductCategory> ProductCategories { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CalculationUnit>().HasIndex(i => i.CalculationUnitName).IsUnique();
+            modelBuilder.Entity<ProductCategory>().HasIndex(i => i.ProductCategoryName).IsUnique();
+        }
     }
 }

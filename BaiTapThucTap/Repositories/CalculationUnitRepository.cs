@@ -25,7 +25,7 @@ namespace BaiTapThucTap.Repositories
 			await applicationDbContext.SaveChangesAsync();
 		}
 
-		public async Task<List<CalculationUnit>> GetAllAsync()
+        public async Task<List<CalculationUnit>> GetAllAsync()
 		{
 			return await applicationDbContext.CalculationUnits.ToListAsync();
 		}
