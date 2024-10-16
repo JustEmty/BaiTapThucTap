@@ -1,0 +1,150 @@
+﻿@page "/supplier-dashboard"
+@using Microsoft.EntityFrameworkCore
+@inject ISupplierRepository supplierRepository
+
+<h3>Danh mục nhà cung cấp</h3>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Mã nhà cung cấp</th>
+                        <th scope="col">Tên nhà cung cấp</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (SupplierList is null)
+                    {
+                        <tr>
+                            <td>Đang lấy dữ liệu...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @if (!SupplierList.Any())
+                        {
+                            <tr>
+                                <td>Không có dữ liệu</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (Supplier item in SupplierList)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.SupplierName</td>
+                                    <td>@item.Note</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="()=>LoadSupplier(item.Id)">Edit</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteSupplier(item.Id)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <EditForm Model="Supplier" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="supplierName">Tên nhà cung cấp</label>
+                    <InputText @bind-Value="Supplier.SupplierName" class="form-control" id="supplierName" placeholder="Tên nhà cung cấp" />
+                    <ValidationMessage For="@(()=>Supplier.SupplierName)" />
+                    <p class="text-danger">@errorMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="Supplier.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div>
+                @if (Supplier.Id > 0)
+                {
+                    <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
+                }
+                <button type="submit" class="btn btn-primary mt-4">@(Supplier.Id > 0 ? "Sửa" : "Thêm")</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public Supplier Supplier { get; set; } = new Supplier();
+
+    public List<Supplier> SupplierList { get; set; }
+
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadSupplierList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadSupplierList()
+    {
+        SupplierList = await supplierRepository.GetAllAsync();
+    }
+
+    private async Task LoadSupplier(int id)
+    {
+        Supplier = await supplierRepository.GetAsync(id);
+    }
+
+    private async Task CreateSupplier()
+    {
+        try
+        {
+            await supplierRepository.CreateAsync(Supplier);
+            await LoadSupplierList();
+            Reset();
+            errorMessage = string.Empty;
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            errorMessage = "Tên nhà cung cấp không được để trống và là duy nhất";
+        }
+    }
+
+    private async Task UpdateSupplier()
+    {
+        await supplierRepository.UpdateAsync(Supplier);
+        await LoadSupplierList();
+        Reset();
+    }
+
+    private async Task DeleteSupplier(int id)
+    {
+        await LoadSupplier(id);
+        await supplierRepository.DeleteAsync(Supplier);
+        await LoadSupplierList();
+        Reset();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (Supplier.Id > 0)
+        {
+            await UpdateSupplier();
+        }
+        else
+        {
+            await CreateSupplier();
+        }
+    }
+
+    private void Reset()
+    {
+        Supplier = new Supplier();
+    }
+}
