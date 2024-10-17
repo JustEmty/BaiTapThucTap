@@ -3,6 +3,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241017024642_AddStorageTableIntoDB")]
+    partial class AddStorageTableIntoDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,34 +135,6 @@ namespace BaiTapThucTap.Migrations
                     b.ToTable("tbl_DM_Kho");
                 });
 
-            modelBuilder.Entity("BaiTapThucTap.Models.StorageUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("LoginCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Ma_Dang_Nhap");
-
-                    b.Property<int>("StorageId")
-                        .HasColumnType("int")
-                        .HasColumnName("Kho_ID");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoginCode")
-                        .IsUnique();
-
-                    b.HasIndex("StorageId")
-                        .IsUnique();
-
-                    b.ToTable("tbl_DM_Kho_User");
-                });
-
             modelBuilder.Entity("BaiTapThucTap.Models.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -203,17 +178,6 @@ namespace BaiTapThucTap.Migrations
                     b.Navigation("CalculationUnit");
 
                     b.Navigation("ProductCategory");
-                });
-
-            modelBuilder.Entity("BaiTapThucTap.Models.StorageUser", b =>
-                {
-                    b.HasOne("BaiTapThucTap.Models.Storage", "Storage")
-                        .WithMany()
-                        .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Storage");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.CalculationUnit", b =>

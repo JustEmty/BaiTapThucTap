@@ -3,6 +3,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241017065643_AddStorageUserIntoDb")]
+    partial class AddStorageUserIntoDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,10 +154,9 @@ namespace BaiTapThucTap.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LoginCode")
-                        .IsUnique();
+                    b.HasIndex("StorageId");
 
-                    b.HasIndex("StorageId")
+                    b.HasIndex("LoginCode", "StorageId")
                         .IsUnique();
 
                     b.ToTable("tbl_DM_Kho_User");

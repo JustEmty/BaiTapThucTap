@@ -1,0 +1,137 @@
+﻿@page "/storage-user-dashboard"
+@using Microsoft.EntityFrameworkCore
+@inject IStorageUserRepository storageUserRepository
+@inject IStorageRepository storageRepository
+
+<h3>Phân quyền kho</h3>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Mã đăng nhập</th>
+                        <th scope="col">Kho</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (StorageUserList is null)
+                    {
+                        <tr>
+                            <td>Đang lấy dữ liệu...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @if (!StorageUserList.Any())
+                        {
+                            <tr>
+                                <td>Không có dữ liệu</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (StorageUser item in StorageUserList)
+                            {
+                                <tr>
+                                    <td>@item.LoginCode</td>
+                                    <td>@StorageList.Find(i => i.Id == item.StorageId).StorageName</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <EditForm Model="StorageUser" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="loginCode">Mã đăng nhập</label>
+                    <InputText @bind-Value="StorageUser.LoginCode" class="form-control" id="loginCode" placeholder="Mã đăng nhập" />
+                    <ValidationMessage For="@(()=>StorageUser.LoginCode)" />
+                    <p class="text-danger">@errorLoginCodeMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="storageId">Kho</label>
+                    <InputSelect @bind-Value="StorageUser.StorageId" class="form-control" id="storageId">
+                        <option value="">--- Chọn Kho ---</option>
+                        @if (StorageList is not null)
+                        {
+                            @foreach (Storage item in StorageList)
+                            {
+                                <option value="@item.Id">@item.StorageName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                </div>
+                <p class="text-danger">@errorStorageIdMessage</p>
+                <button type="submit" class="btn btn-primary mt-4">Thêm</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public StorageUser StorageUser { get; set; } = new StorageUser();
+
+    public List<StorageUser> StorageUserList { get; set; }
+    public List<Storage> StorageList { get; set; }
+
+    private string errorLoginCodeMessage = string.Empty;
+    private string errorStorageIdMessage = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadStorageUserList();
+            await LoadStorageList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadStorageUserList()
+    {
+        StorageUserList = await storageUserRepository.GetAllAsync();
+    }
+
+    private async Task LoadStorageList()
+    {
+        StorageList = await storageRepository.GetAllAsync();
+    }
+
+    private async Task CreateStorageUser()
+    {
+        try
+        {
+            await storageUserRepository.CreateAsync(StorageUser);
+            await LoadStorageUserList();
+            Reset();
+            errorLoginCodeMessage = string.Empty;
+            errorStorageIdMessage = string.Empty;
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            errorLoginCodeMessage = "Mã đăng nhập phải là duy nhất";
+            errorStorageIdMessage = "Kho đã được sử dụng hãy chọn Kho khác";
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+       await CreateStorageUser();
+    }
+
+    private void Reset()
+    {
+        StorageUser = new StorageUser();
+    }
+}

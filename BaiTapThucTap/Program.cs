@@ -13,6 +13,8 @@ builder.Services.AddScoped<ICalculationUnitRepository, CalculationUnitRepository
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<IStorageRepository, StorageRepository>();
+builder.Services.AddScoped<IStorageUserRepository, StorageUserRepository>();
 
 var app = builder.Build();
 

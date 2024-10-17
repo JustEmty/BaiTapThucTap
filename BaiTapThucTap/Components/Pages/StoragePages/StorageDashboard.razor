@@ -1,22 +1,21 @@
-﻿@page "/supplier-dashboard"
+﻿@page "/storage-dashboard"
 @using Microsoft.EntityFrameworkCore
-@inject ISupplierRepository supplierRepository
+@inject IStorageRepository storageRepository
 
-<h3>Danh mục nhà cung cấp</h3>
+<h3>Danh mục kho</h3>
 <div class="container mt-4">
     <div class="row">
         <div class="col">
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
-                        <th scope="col">Mã nhà cung cấp</th>
-                        <th scope="col">Tên nhà cung cấp</th>
+                        <th scope="col">Tên kho</th>
                         <th scope="col">Ghi chú</th>
                         <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (SupplierList is null)
+                    @if (StorageList is null)
                     {
                         <tr>
                             <td>Đang lấy dữ liệu...</td>
@@ -24,7 +23,7 @@
                     }
                     else
                     {
-                        @if (!SupplierList.Any())
+                        @if (!StorageList.Any())
                         {
                             <tr>
                                 <td>Không có dữ liệu</td>
@@ -32,15 +31,14 @@
                         }
                         else
                         {
-                            @foreach (Supplier item in SupplierList)
+                            @foreach (Storage item in StorageList)
                             {
                                 <tr>
-                                    <td>@item.Id</td>
-                                    <td>@item.SupplierName</td>
+                                    <td>@item.StorageName</td>
                                     <td>@item.Note</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadSupplier(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteSupplier(item.Id)">Delete</button>
+                                        <button class="btn btn-primary" @onclick="()=>LoadStorage(item.Id)">Edit</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteStorage(item.Id)">Delete</button>
                                     </td>
                                 </tr>
                             }
@@ -50,23 +48,23 @@
             </table>
         </div>
         <div class="col">
-            <EditForm Model="Supplier" OnValidSubmit="OnSubmit">
+            <EditForm Model="Storage" OnValidSubmit="OnSubmit">
                 <DataAnnotationsValidator />
                 <div class="form-group">
-                    <label for="supplierName">Tên nhà cung cấp</label>
-                    <InputText @bind-Value="Supplier.SupplierName" class="form-control" id="supplierName" placeholder="Tên nhà cung cấp" />
-                    <ValidationMessage For="@(()=>Supplier.SupplierName)" />
+                    <label for="storageName">Tên kho</label>
+                    <InputText @bind-Value="Storage.StorageName" class="form-control" id="storageName" placeholder="Tên kho" />
+                    <ValidationMessage For="@(()=>Storage.StorageName)" />
                     <p class="text-danger">@errorMessage</p>
                 </div>
                 <div class="form-group">
                     <label for="note">Ghi chú</label>
-                    <InputTextArea @bind-Value="Supplier.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                    <InputTextArea @bind-Value="Storage.Note" class="form-control" id="note" rows="3"></InputTextArea>
                 </div>
-                @if (Supplier.Id > 0)
+                @if (Storage.Id > 0)
                 {
                     <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
                 }
-                <button type="submit" class="btn btn-primary mt-4">@(Supplier.Id > 0 ? "Sửa" : "Thêm")</button>
+                <button type="submit" class="btn btn-primary mt-4">@(Storage.Id > 0 ? "Sửa" : "Thêm")</button>
             </EditForm>
         </div>
     </div>
@@ -74,9 +72,9 @@
 
 @code {
     [SupplyParameterFromForm]
-    public Supplier Supplier { get; set; } = new Supplier();
+    public Storage Storage { get; set; } = new Storage();
 
-    public List<Supplier> SupplierList { get; set; }
+    public List<Storage> StorageList { get; set; }
 
     private string errorMessage = string.Empty;
 
@@ -86,65 +84,65 @@
 
         if (firstRender)
         {
-            await LoadSupplierList();
+            await LoadStorageList();
             await InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task LoadSupplierList()
+    private async Task LoadStorageList()
     {
-        SupplierList = await supplierRepository.GetAllAsync();
+        StorageList = await storageRepository.GetAllAsync();
     }
 
-    private async Task LoadSupplier(int id)
+    private async Task LoadStorage(int id)
     {
-        Supplier = await supplierRepository.GetAsync(id);
+        Storage = await storageRepository.GetAsync(id);
     }
 
-    private async Task CreateSupplier()
+    private async Task CreateStorage()
     {
         try
         {
-            await supplierRepository.CreateAsync(Supplier);
-            await LoadSupplierList();
+            await storageRepository.CreateAsync(Storage);
+            await LoadStorageList();
             Reset();
             errorMessage = string.Empty;
         }
         catch (DbUpdateException dbUpdateException)
         {
-            errorMessage = "Tên nhà cung cấp phải là duy nhất";
+            errorMessage = "Tên kho phải là duy nhất";
         }
     }
 
-    private async Task UpdateSupplier()
+    private async Task UpdateStorage()
     {
-        await supplierRepository.UpdateAsync(Supplier);
-        await LoadSupplierList();
+        await storageRepository.UpdateAsync(Storage);
+        await LoadStorageList();
         Reset();
     }
 
-    private async Task DeleteSupplier(int id)
+    private async Task DeleteStorage(int id)
     {
-        await LoadSupplier(id);
-        await supplierRepository.DeleteAsync(Supplier);
-        await LoadSupplierList();
+        await LoadStorage(id);
+        await storageRepository.DeleteAsync(Storage);
+        await LoadStorageList();
         Reset();
     }
 
     private async Task OnSubmit()
     {
-        if (Supplier.Id > 0)
+        if (Storage.Id > 0)
         {
-            await UpdateSupplier();
+            await UpdateStorage();
         }
         else
         {
-            await CreateSupplier();
+            await CreateStorage();
         }
     }
 
     private void Reset()
     {
-        Supplier = new Supplier();
+        Storage = new Storage();
     }
 }
