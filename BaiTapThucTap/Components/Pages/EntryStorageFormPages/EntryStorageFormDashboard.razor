@@ -3,6 +3,7 @@
 @inject IEntryStorageFormRepository entryStorageFormRepository
 @inject IStorageRepository storageRepository
 @inject ISupplierRepository supplierRepository
+@inject IExportEntryStorageFormRepository exportEntryStorageFormRepository
 
 <h3>Quản lý phiếp nhập</h3>
 <div class="container mt-4">
@@ -46,6 +47,7 @@
                                     <td>@item.Note</td>
                                     <td>
                                         <button class="btn btn-primary" @onclick="()=>LoadEntryStorageForm(item.Id)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteEntryStorageForm(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -199,7 +201,20 @@
 
     private async Task UpdateEntryStorageForm()
     {
-        await entryStorageFormRepository.UpdateAsync(EntryStorageForm);
+        ExportEntryStorageForm exportEntryStorageForm = new ExportEntryStorageForm();
+        exportEntryStorageForm.EntryStorageFormId = EntryStorageForm.EntryStorageFormId;
+        exportEntryStorageForm.SupplierId = EntryStorageForm.SupplierId;
+        exportEntryStorageForm.StorageId = EntryStorageForm.StorageId;
+        exportEntryStorageForm.EntryStorageFormDate = EntryStorageForm.EntryStorageFormDate;
+        await exportEntryStorageFormRepository.UpdateAsync(exportEntryStorageForm);
+        await LoadEntryStorageFormList();
+        Reset();
+    }
+
+    private async Task DeleteEntryStorageForm(int id)
+    {
+        await LoadEntryStorageForm(id);
+        await entryStorageFormRepository.DeleteAsync(EntryStorageForm);
         await LoadEntryStorageFormList();
         Reset();
     }

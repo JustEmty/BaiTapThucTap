@@ -28,9 +28,9 @@ namespace BaiTapThucTap.Repositories
             return await applicationDbContext.EntryStorageForms.Where(i => i.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task UpdateAsync(EntryStorageForm entryStorageForm)
+        public async Task DeleteAsync(EntryStorageForm entryStorageForm)
         {
-            applicationDbContext.EntryStorageForms.Update(entryStorageForm);
+            applicationDbContext.EntryStorageForms.Remove(entryStorageForm);
             await applicationDbContext.SaveChangesAsync();
         }
     }

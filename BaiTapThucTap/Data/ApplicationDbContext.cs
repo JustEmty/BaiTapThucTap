@@ -15,6 +15,7 @@ namespace BaiTapThucTap.Data
         public DbSet<StorageUser> StorageUsers { get; set; }
         public DbSet<EntryStorageForm> EntryStorageForms { get; set; }
         public DbSet<EntryStorageFormRawData> EntryStorageFormRawDatas { get; set; }
+        public DbSet<ExportEntryStorageForm> ExportEntryStorageForms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +26,7 @@ namespace BaiTapThucTap.Data
             modelBuilder.Entity<StorageUser>().HasIndex(i => i.LoginCode).IsUnique();
             modelBuilder.Entity<StorageUser>().HasIndex(i => i.StorageId).IsUnique();
             modelBuilder.Entity<EntryStorageForm>().HasIndex(i => i.EntryStorageFormId).IsUnique();
+            modelBuilder.Entity<ExportEntryStorageForm>().HasIndex(i => i.EntryStorageFormId).IsUnique();
         }
     }
 }
