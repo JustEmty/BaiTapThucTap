@@ -1,0 +1,224 @@
+﻿@page "/entry-storage-form-dashboard"
+@using Microsoft.EntityFrameworkCore
+@inject IEntryStorageFormRepository entryStorageFormRepository
+@inject IStorageRepository storageRepository
+@inject ISupplierRepository supplierRepository
+
+<h3>Quản lý phiếp nhập</h3>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Số phiếu nhập kho</th>
+                        <th scope="col">Kho</th>
+                        <th scope="col">Nhà cung cấp</th>
+                        <th scope="col">Ngày nhập kho</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (EntryStorageFormList is null)
+                    {
+                        <tr>
+                            <td>Đang lấy dữ liệu...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @if (!EntryStorageFormList.Any())
+                        {
+                            <tr>
+                                <td>Không có dữ liệu</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (EntryStorageForm item in EntryStorageFormList)
+                            {
+                                <tr>
+                                    <td>@item.EntryStorageFormId</td>
+                                    <td>@StorageList.Find(i => i.Id == item.StorageId).StorageName</td>
+                                    <td>@SupplierList.Find(i => i.Id == item.SupplierId).SupplierName</td>
+                                    <td>@item.EntryStorageFormDate</td>
+                                    <td>@item.Note</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="()=>LoadEntryStorageForm(item.Id)">Sửa</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <EditForm Model="EntryStorageForm" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="entryStorageFormId">Số phiếu nhập</label>
+                    <InputText @bind-Value="EntryStorageForm.EntryStorageFormId" class="form-control" id="entryStorageFormId" placeholder="12345679abc..." />
+                    <ValidationMessage For="@(()=>EntryStorageForm.EntryStorageFormId)" />
+                    <p class="text-danger">@errorEntryStorageFormMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="storageId">Kho</label>
+                    <InputSelect @bind-Value="EntryStorageForm.StorageId" class="form-control" id="storageId">
+                        <option value="">--- Chọn kho ---</option>
+                        @if (StorageList is not null)
+                        {
+                            @foreach (Storage item in StorageList)
+                            {
+                                <option value="@item.Id">@item.StorageName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                    <p class="text-danger">@errorStorageMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="supplierId">Nhà cung cấp</label>
+                    <InputSelect @bind-Value="EntryStorageForm.SupplierId" class="form-control" id="supplierId">
+                        <option value="">--- Chọn nhà cung cấp ---</option>
+                        @if (SupplierList is not null)
+                        {
+                            @foreach (Supplier item in SupplierList)
+                            {
+                                <option value="@item.Id">@item.SupplierName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                    <p class="text-danger">@errorSupplierMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="entryStorageFormDate">Ngày nhập kho:</label>
+                    <div class="col-md-10">
+                        <InputDate @bind-Value="EntryStorageForm.EntryStorageFormDate" id="entryStorageFormDate" class="form-control"/>
+                        <ValidationMessage For="@(() => EntryStorageForm.EntryStorageFormDate)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="EntryStorageForm.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div>
+                @if (EntryStorageForm.Id > 0)
+                {
+                    <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
+                }
+                <button type="submit" class="btn btn-primary mt-4">@(EntryStorageForm.Id > 0 ? "Sửa" : "Thêm")</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public EntryStorageForm EntryStorageForm { get; set; } = new EntryStorageForm();
+
+    public List<EntryStorageForm> EntryStorageFormList { get; set; }
+    public List<Storage> StorageList { get; set; }
+    public List<Supplier> SupplierList { get; set; }
+
+    private string errorEntryStorageFormMessage = string.Empty;
+    private string errorStorageMessage = string.Empty;
+    private string errorSupplierMessage = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            EntryStorageForm.EntryStorageFormDate = DateOnly.FromDateTime(DateTime.Today);
+            await LoadEntryStorageFormList();
+            await LoadStorageList();
+            await LoadSupplierList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadSupplierList()
+    {
+        SupplierList = await supplierRepository.GetAllAsync();
+    }
+
+    private async Task LoadStorageList()
+    {
+        StorageList = await storageRepository.GetAllAsync();
+    }
+
+    private async Task LoadEntryStorageFormList()
+    {
+        EntryStorageFormList = await entryStorageFormRepository.GetAllAsync();
+    }
+
+    private async Task LoadEntryStorageForm(int id)
+    {
+        Reset();
+        EntryStorageForm = await entryStorageFormRepository.GetAsync(id);
+    }
+
+    private async Task CreateEntryStorageForm()
+    {
+        errorStorageMessage = string.Empty;
+        errorSupplierMessage = string.Empty;
+        errorEntryStorageFormMessage = string.Empty;
+
+        if(EntryStorageForm.StorageId <= 0)
+        {
+            errorStorageMessage = "Kho không được rỗng";
+            return;
+        }
+
+        if(EntryStorageForm.SupplierId <= 0)
+        {
+            errorSupplierMessage = "Nhà cung cấp không được rỗng";
+            return;
+        }
+
+        try
+        {
+            await entryStorageFormRepository.CreateAsync(EntryStorageForm);
+            await LoadEntryStorageFormList();
+            Reset();
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            errorEntryStorageFormMessage = "Số phiếu nhập phải là duy nhất";
+        }
+    }
+
+    private async Task UpdateEntryStorageForm()
+    {
+        await entryStorageFormRepository.UpdateAsync(EntryStorageForm);
+        await LoadEntryStorageFormList();
+        Reset();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (EntryStorageForm.Id > 0)
+        {
+            await UpdateEntryStorageForm();
+        }
+        else
+        {
+            await CreateEntryStorageForm();
+        }
+    }
+
+    private void Reset()
+    {
+        EntryStorageForm = new EntryStorageForm();
+        EntryStorageForm.EntryStorageFormDate = DateOnly.FromDateTime(DateTime.Today);
+    }
+}

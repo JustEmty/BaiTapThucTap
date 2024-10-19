@@ -37,8 +37,8 @@
                                     <td>@item.StorageName</td>
                                     <td>@item.Note</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadStorage(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteStorage(item.Id)">Delete</button>
+                                        <button class="btn btn-primary" @onclick="()=>LoadStorage(item.Id)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteStorage(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -96,6 +96,7 @@
 
     private async Task LoadStorage(int id)
     {
+        Reset();
         Storage = await storageRepository.GetAsync(id);
     }
 

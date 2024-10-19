@@ -15,6 +15,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 builder.Services.AddScoped<IStorageRepository, StorageRepository>();
 builder.Services.AddScoped<IStorageUserRepository, StorageUserRepository>();
+builder.Services.AddScoped<IEntryStorageFormRepository, EntryStorageFormRepository>();
 
 var app = builder.Build();
 

@@ -27,7 +27,7 @@ namespace BaiTapThucTap.Models
 
         [Column("Ngay_Nhap_Kho")]
         [Required(ErrorMessage = "Ngày nhập kho không được rỗng")]
-        public DateTime EntryStorageFormDate { get; set; }
+        public DateOnly EntryStorageFormDate { get; set; }
 
         [Column("Ghi_Chu")]
         public string? Note { get; set; }

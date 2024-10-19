@@ -37,8 +37,8 @@
                                     <td>@item.CalculationUnitName</td>
                                     <td>@item.Note</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadCalculationUnit(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteCalculationUnit(item.Id)">Delete</button>
+                                        <button class="btn btn-primary" @onclick="()=>LoadCalculationUnit(item.Id)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteCalculationUnit(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -96,6 +96,7 @@
 
     private async Task LoadCalculationUnit(int id)
     {
+        Reset();
         CalculationUnit = await calculationUnitRepository.GetAsync(id); 
     }
 

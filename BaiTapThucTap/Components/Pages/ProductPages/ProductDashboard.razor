@@ -44,8 +44,8 @@
                                     <td>@CalculationUnitList.Find(i => i.Id == item.CalculationUnitId).CalculationUnitName</td>
                                     <td>@item.Note</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadProduct(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteProduct(item.Id)">Delete</button>
+                                        <button class="btn btn-primary" @onclick="()=>LoadProduct(item.Id)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteProduct(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -157,6 +157,7 @@
 
     private async Task LoadProduct(int id)
     {
+        Reset();
         Product = await productRepository.GetAsync(id);
     }
 

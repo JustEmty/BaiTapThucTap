@@ -22,7 +22,7 @@ namespace BaiTapThucTap.Models
         [Column("SL_Nhap")]
         public int? Quantities { get; set; }
 
-        [Column("Don_Gia_Nhap")]
+        [Column("Don_Gia_Nhap", TypeName = "decimal(18,2)")]
         public decimal? Price { get; set; }
     }
 }

@@ -39,8 +39,8 @@
                                     <td>@item.ProductCategoryName</td>
                                     <td>@item.Note</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadProductCategory(item.Id)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteProductCategory(item.Id)">Delete</button>
+                                        <button class="btn btn-primary" @onclick="()=>LoadProductCategory(item.Id)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="()=>DeleteProductCategory(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -102,6 +102,7 @@
 
     private async Task LoadProductCategory(int id)
     {
+        Reset();
         ProductCategory = await productCategoryRepository.GetAsync(id);
     }
 
