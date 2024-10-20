@@ -8,7 +8,7 @@
 
 <h3 class="hideWhenPrint">Quản lý phiếp nhập</h3>
 <div class="row">
-    @if (!isEditMode)
+    @if (!isEditHeaderFormMode)
     {
         <div class="col hideWhenPrint">
             <table class="table">
@@ -47,9 +47,10 @@
                                     <td>@SupplierList.Find(i => i.Id == item.SupplierId).SupplierName</td>
                                     <td>@item.EntryStorageFormDate</td>
                                     <td>@item.Note</td>
-                                    <td>
-                                        <button class="btn btn-primary" @onclick="()=>LoadEntryStorageForm(item.Id)">Hiệu chỉnh thông tin phiếu nhập</button>
-                                        <button class="btn btn-danger" @onclick="()=>DeleteEntryStorageForm(item.Id)">Xóa</button>
+                                    <td class="d-flex flex-wrap gap-1">
+                                        <button class="btn btn-primary" style="width: 150px" @onclick="()=>LoadEntryStorageForm(item.Id)">Hiệu chỉnh thông tin phiếu nhập</button>
+                                        <button class="btn btn-success" style="width: 150px" @onclick="()=>LoadEntryStorageForm(item.Id)">Hiệu chỉnh chi tiết phiếu nhập</button>
+                                        <button class="btn btn-danger" style="width: 150px" @onclick="()=>DeleteEntryStorageForm(item.Id)">Xóa</button>
                                     </td>
                                 </tr>
                             }
@@ -59,69 +60,71 @@
             </table>
         </div>
     }
-    <div class="col-4 hideWhenPrint">
-        <EditForm Model="EntryStorageForm" OnValidSubmit="OnSubmit">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="entryStorageFormId">Số phiếu nhập</label>
-                <InputText @bind-Value="EntryStorageForm.EntryStorageFormId" class="form-control" id="entryStorageFormId" placeholder="12345679abc..." />
-                <ValidationMessage For="@(()=>EntryStorageForm.EntryStorageFormId)" />
-                <p class="text-danger">@errorEntryStorageFormMessage</p>
-            </div>
-            <div class="form-group">
-                <label for="storageId">Kho</label>
-                <InputSelect @bind-Value="EntryStorageForm.StorageId" class="form-control" id="storageId">
-                    <option value="">--- Chọn kho ---</option>
-                    @if (StorageList is not null)
-                    {
-                        @foreach (Storage item in StorageList)
-                        {
-                            <option value="@item.Id">@item.StorageName</option>
-                        }
-                    }
-                    else
-                    {
-                        <option>Đang tải dữ liệu...</option>
-                    }
-                </InputSelect>
-                <p class="text-danger">@errorStorageMessage</p>
-            </div>
-            <div class="form-group">
-                <label for="supplierId">Nhà cung cấp</label>
-                <InputSelect @bind-Value="EntryStorageForm.SupplierId" class="form-control" id="supplierId">
-                    <option value="">--- Chọn nhà cung cấp ---</option>
-                    @if (SupplierList is not null)
-                    {
-                        @foreach (Supplier item in SupplierList)
-                        {
-                            <option value="@item.Id">@item.SupplierName</option>
-                        }
-                    }
-                    else
-                    {
-                        <option>Đang tải dữ liệu...</option>
-                    }
-                </InputSelect>
-                <p class="text-danger">@errorSupplierMessage</p>
-            </div>
-            <div class="form-group">
-                <label for="entryStorageFormDate">Ngày nhập kho:</label>
-                <div class="col-md-10">
-                    <InputDate @bind-Value="EntryStorageForm.EntryStorageFormDate" id="entryStorageFormDate" class="form-control" />
-                    <ValidationMessage For="@(() => EntryStorageForm.EntryStorageFormDate)" />
+    @if(!isEditDetailFormMode){
+        <div class="col-4 hideWhenPrint">
+            <EditForm Model="EntryStorageForm" OnValidSubmit="OnSubmit" FormName="Header">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="entryStorageFormId">Số phiếu nhập</label>
+                    <InputText @bind-Value="EntryStorageForm.EntryStorageFormId" class="form-control" id="entryStorageFormId" placeholder="12345679abc..." />
+                    <ValidationMessage For="@(()=>EntryStorageForm.EntryStorageFormId)" />
+                    <p class="text-danger">@errorEntryStorageFormMessage</p>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="note">Ghi chú</label>
-                <InputTextArea @bind-Value="EntryStorageForm.Note" class="form-control" id="note" rows="3"></InputTextArea>
-            </div>
-            @if (EntryStorageForm.Id > 0)
-            {
-                <button type="reset" class="btn btn-secondary mt-4" @onclick="Reset">Hủy</button>
-            }
-            <button type="submit" class="btn btn-primary mt-4">@(EntryStorageForm.Id > 0 ? "Hiệu chỉnh thông tin phiếu nhập" : "Thêm")</button>
-        </EditForm>
-    </div>
+                <div class="form-group">
+                    <label for="storageId">Kho</label>
+                    <InputSelect @bind-Value="EntryStorageForm.StorageId" class="form-control" id="storageId">
+                        <option value="">--- Chọn kho ---</option>
+                        @if (StorageList is not null)
+                        {
+                            @foreach (Storage item in StorageList)
+                            {
+                                <option value="@item.Id">@item.StorageName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                    <p class="text-danger">@errorStorageMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="supplierId">Nhà cung cấp</label>
+                    <InputSelect @bind-Value="EntryStorageForm.SupplierId" class="form-control" id="supplierId">
+                        <option value="">--- Chọn nhà cung cấp ---</option>
+                        @if (SupplierList is not null)
+                        {
+                            @foreach (Supplier item in SupplierList)
+                            {
+                                <option value="@item.Id">@item.SupplierName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                    <p class="text-danger">@errorSupplierMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="entryStorageFormDate">Ngày nhập kho:</label>
+                    <div class="col-md-10">
+                        <InputDate @bind-Value="EntryStorageForm.EntryStorageFormDate" id="entryStorageFormDate" class="form-control" />
+                        <ValidationMessage For="@(() => EntryStorageForm.EntryStorageFormDate)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="EntryStorageForm.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div>
+                @if (EntryStorageForm.Id > 0)
+                {
+                    <button type="reset" class="btn btn-secondary mt-4 me-2" @onclick="Reset">Hủy</button>
+                }
+                <button type="submit" class="btn btn-primary mt-4">@(EntryStorageForm.Id > 0 ? "Hiệu chỉnh thông tin phiếu nhập" : "Thêm")</button>
+            </EditForm>
+        </div>
+    }
     @if (EntryStorageForm.Id > 0)
     {
         <div class="col">
@@ -166,12 +169,85 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-2">
+                <table class="table table-bordered">
+                    <thead style="background-color: #d2d7e3">
+                        <tr>
+                            <th scope="col" rowspan="2">STT</th>
+                            <th scope="col" rowspan="2">Tên nhãn hiệu, quy cách, phẩm chất, vật tư, dụng cụ, sản phẩm, hàng hóa</th>
+                            <th scope="col" rowspan="2">Mã hàng</th>
+                            <th scope="col" rowspan="2">Đơn vị tính</th>
+                            <th scope="col" colspan="2" align="center">Số lượng</th>
+                            <th scope="col" rowspan="2">Đơn giá</th>
+                            <th scope="col" rowspan="2">Thành tiền</th>
+                        </tr>
+                        <tr>
+                            <th>Kiện</th>
+                            <th>Cái</th>
+                        </tr>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>Otto</td>
+                            <td>Otto</td>
+                            <td>Otto</td>
+                            <td>Otto</td>
+                            <td>Otto</td>
+                        </tr>
+                    </tbody>
+                    <tfoot style="background-color: #d2d7e3">
+                        <tr>
+                            <th colspan="4" class="text-end">Tổng</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="fw-bold">Tổng Số Tiền (Viết bằng chữ): </p>
+            <div class="d-flex">
+                <p class="fw-bold w-50">Số Chứng Từ Gốc Kèm Theo:</p>
+                <p class="w-50">Ngày ...... Tháng ...... Năm ......</p>
+            </div>
+            <div class="d-flex mt-2 justify-content-between">
+                <div>
+                    <p class="fw-bold text-center">Người Lập Phiếu</p>
+                    <p class="text-center">(Ký, họ tên)</p>
+                </div>
+                <div>
+                    <p class="fw-bold text-center">Người Giao Hàng</p>
+                    <p class="text-center">(Ký, họ tên)</p>
+                </div>
+                <div>
+                    <p class="fw-bold text-center">Thủ Kho</p>
+                    <p class="text-center">(Ký, họ tên)</p>
+                </div>
+                <div>
+                    <p class="fw-bold text-center">Kế Toán Trưởng</p>
+                    <p class="text-center">(Ký, họ tên)</p>
+                </div>
+            </div>
         </div>
     }
 </div>
 
 @code {
-    [SupplyParameterFromForm]
+    [SupplyParameterFromForm(Name = "Header")]
     public EntryStorageForm EntryStorageForm { get; set; } = new EntryStorageForm();
 
     public List<EntryStorageForm> EntryStorageFormList { get; set; }
@@ -181,7 +257,8 @@
     private string errorEntryStorageFormMessage = string.Empty;
     private string errorStorageMessage = string.Empty;
     private string errorSupplierMessage = string.Empty;
-    private bool isEditMode = false;
+    private bool isEditHeaderFormMode = false;
+    private bool isEditDetailFormMode = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -284,12 +361,12 @@
     {
         EntryStorageForm = new EntryStorageForm();
         EntryStorageForm.EntryStorageFormDate = DateOnly.FromDateTime(DateTime.Today);
-        ToggleEditMode();
+        ToggleEditHeaderFormMode();
     }
 
-    private void ToggleEditMode()
+    private void ToggleEditHeaderFormMode()
     {
-        isEditMode = !isEditMode;
+        isEditHeaderFormMode = !isEditHeaderFormMode;
     }
 
     private async void PrintForm()
