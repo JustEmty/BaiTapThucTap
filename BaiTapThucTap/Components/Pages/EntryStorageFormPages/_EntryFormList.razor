@@ -1,0 +1,86 @@
+﻿<div class="col hideWhenPrint">
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Số phiếu nhập kho</th>
+                <th scope="col">Kho</th>
+                <th scope="col">Nhà cung cấp</th>
+                <th scope="col">Ngày nhập kho</th>
+                <th scope="col">Ghi chú</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (EntryStorageFormList is null)
+            {
+                <tr>
+                    <td>Đang lấy dữ liệu...</td>
+                </tr>
+            }
+            else
+            {
+                @if (!EntryStorageFormList.Any())
+                {
+                    <tr>
+                        <td>Không có dữ liệu</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (EntryStorageForm item in EntryStorageFormList)
+                    {
+                        <tr>
+                            <td>@item.EntryStorageFormId</td>
+                            <td>@StorageList.Find(i => i.Id == item.StorageId).StorageName</td>
+                            <td>@SupplierList.Find(i => i.Id == item.SupplierId).SupplierName</td>
+                            <td>@item.EntryStorageFormDate</td>
+                            <td>@item.Note</td>
+                            <td class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-primary" style="width: 150px" @onclick="()=>{OnLoad(item.Id); OnSetEditFormMode(true);}">Hiệu chỉnh thông tin phiếu nhập</button>
+                                <button class="btn btn-success" style="width: 150px" @onclick="()=>OnEdit(item.Id)">Hiệu chỉnh chi tiết phiếu nhập</button>
+                                <button class="btn btn-danger" style="width: 150px" @onclick="()=>OnDelete(item.Id)">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<EntryStorageForm> EntryStorageFormList { get; set; }
+    [Parameter]
+    public List<Storage> StorageList { get; set; }
+    [Parameter]
+    public List<Supplier> SupplierList { get; set; }
+    [Parameter]
+    public EventCallback<int> LoadEntryStorageForm { get; set; }
+    [Parameter]
+    public EventCallback<int> EditEntryStorageFormRawData { get; set; }
+    [Parameter]
+    public EventCallback<int> DeleteEntryStorageForm { get; set; }
+    [Parameter]
+    public EventCallback<bool> SetEditHeaderFormMode { get; set; }
+
+    private async Task OnLoad(int id)
+    {
+        await LoadEntryStorageForm.InvokeAsync(id);
+    }
+
+    private async Task OnEdit(int id)
+    {
+        await EditEntryStorageFormRawData.InvokeAsync(id);
+    }
+
+    private async Task OnDelete(int id)
+    {
+        await DeleteEntryStorageForm.InvokeAsync(id);
+    }
+
+    private async Task OnSetEditFormMode(bool isOn)
+    {
+        await SetEditHeaderFormMode.InvokeAsync(isOn);
+    }
+}
