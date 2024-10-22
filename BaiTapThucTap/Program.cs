@@ -18,6 +18,7 @@ builder.Services.AddScoped<IStorageUserRepository, StorageUserRepository>();
 builder.Services.AddScoped<IEntryStorageFormRepository, EntryStorageFormRepository>();
 builder.Services.AddScoped<IEntryStorageFormRawDataRepository, EntryStorageFormRawDataRepository>();
 builder.Services.AddScoped<IExportEntryStorageFormRepository, ExportEntryStorageFormRepository>();
+builder.Services.AddScoped<IExportStorageRepository, ExportStorageRepository>();
 
 var app = builder.Build();
 

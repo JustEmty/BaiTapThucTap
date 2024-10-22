@@ -4,6 +4,7 @@ using BaiTapThucTap.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaiTapThucTap.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241022075946_AddExportStorageAndExportStorageRawDataIntoDb")]
+    partial class AddExportStorageAndExportStorageRawDataIntoDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,42 +366,6 @@ namespace BaiTapThucTap.Migrations
                     b.ToTable("tbl_DM_NCC");
                 });
 
-            modelBuilder.Entity("BaiTapThucTap.Models.XNKExportStorage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateOnly>("ExportStorageDate")
-                        .HasColumnType("date")
-                        .HasColumnName("Ngay_Xuat_Kho");
-
-                    b.Property<int?>("ExportStorageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExportStorageName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("So_Phieu_Xuat_Kho");
-
-                    b.Property<int>("StorageId")
-                        .HasColumnType("int")
-                        .HasColumnName("Kho_ID");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExportStorageId");
-
-                    b.HasIndex("ExportStorageName")
-                        .IsUnique();
-
-                    b.HasIndex("StorageId");
-
-                    b.ToTable("tbl_XNK_Xuat_Kho");
-                });
-
             modelBuilder.Entity("BaiTapThucTap.Models.EntryStorageForm", b =>
                 {
                     b.HasOne("BaiTapThucTap.Models.Storage", "Storage")
@@ -504,23 +471,6 @@ namespace BaiTapThucTap.Migrations
                         .HasForeignKey("StorageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Storage");
-                });
-
-            modelBuilder.Entity("BaiTapThucTap.Models.XNKExportStorage", b =>
-                {
-                    b.HasOne("BaiTapThucTap.Models.ExportStorage", "ExportStorage")
-                        .WithMany()
-                        .HasForeignKey("ExportStorageId");
-
-                    b.HasOne("BaiTapThucTap.Models.Storage", "Storage")
-                        .WithMany()
-                        .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ExportStorage");
 
                     b.Navigation("Storage");
                 });

@@ -1,0 +1,134 @@
+﻿@page "/export-storage-dashboard"
+@using Microsoft.EntityFrameworkCore
+@inject IExportStorageRepository exportStorageRepository
+@inject IStorageRepository storageRepository
+
+<h3>Quản lý phiếu xuất</h3>
+@if (!isAddMode)
+{
+    <_ExportStorageList DeleteExportStorage="DeleteExportStorage" ExportStorageList="ExportStorageList" HandleExportStorageFormVisual="HandleExportStorageFormVisual" StorageList="StorageList"/>
+}
+else
+{
+    <div class="col hideWhenPrint">
+        <EditForm Model="ExportStorage" OnValidSubmit="OnSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="exportStorageName">Số phiếu xuất</label>
+                <InputText @bind-Value="ExportStorage.ExportStorageName" class="form-control" id="exportStorageName" placeholder="12345679abc..." />
+                <ValidationMessage For="@(()=>ExportStorage.ExportStorageName)" />
+                <p class="text-danger">@errorStorageId</p>
+            </div>
+            <div class="form-group">
+                <label for="storageId">Kho</label>
+                <InputSelect @bind-Value="ExportStorage.StorageId" class="form-control" id="storageId">
+                    <option value="">--- Chọn kho ---</option>
+                    @if (StorageList is not null)
+                    {
+                        @foreach (Storage item in StorageList)
+                        {
+                            <option value="@item.Id">@item.StorageName</option>
+                        }
+                    }
+                    else
+                    {
+                        <option>Đang tải dữ liệu...</option>
+                    }
+                </InputSelect>
+                <p class="text-danger">@errorStorageMessage</p>
+            </div>
+            <div class="form-group">
+                <label for="entryStorageDate">Ngày nhập kho:</label>
+                <div class="col-md-10">
+                    <InputDate @bind-Value="ExportStorage.ExportStorageDate" id="entryStorageDate" class="form-control" />
+                    <ValidationMessage For="@(() => ExportStorage.ExportStorageDate)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="note">Ghi chú</label>
+                <InputTextArea @bind-Value="ExportStorage.Note" class="form-control" id="note" rows="3"></InputTextArea>
+            </div>
+            <button type="submit" class="btn btn-secondary mt-4">Quay lại</button>
+            <button type="submit" class="btn btn-primary mt-4">Thêm</button>
+        </EditForm>
+    </div>
+}
+
+
+@code {
+    [SupplyParameterFromForm]
+    public ExportStorage ExportStorage { get; set; }
+
+    public List<ExportStorage> ExportStorageList { get; set; }
+    public List<Storage> StorageList { get; set; }
+
+    private bool isAddMode;
+    private string errorStorageMessage = string.Empty;
+    private string errorStorageId = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            HandleExportStorageFormVisual(false);
+            ResetExportStorage();
+            await LoadExportStorageList();
+            await LoadStorageList();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadExportStorageList()
+    {
+        ExportStorageList = await exportStorageRepository.GetAllAsync();
+    }
+
+    private async Task LoadStorageList()
+    {
+        StorageList = await storageRepository.GetAllAsync();
+    }
+
+    private async Task CreateExportStorage()
+    {
+        errorStorageMessage = string.Empty;
+        errorStorageId = string.Empty;
+
+        if(ExportStorage.StorageId <= 0)
+        {
+            errorStorageMessage = "Vui lòng chọn kho";
+            return;
+        }
+
+        try
+        {
+            await exportStorageRepository.CreateAsync(ExportStorage);
+            await LoadExportStorageList();
+            HandleExportStorageFormVisual(false);
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            errorStorageId = "Mã phiếu đã tồn tại vui lòng nhập mã phiếu khác";
+        }
+    }
+
+    private async Task DeleteExportStorage(int id)
+    {
+        await LoadExportStorageList();
+    }
+
+    private void HandleExportStorageFormVisual(bool isShow)
+    {
+        isAddMode = isShow;
+    }
+
+    private async Task OnSubmit()
+    {
+        await CreateExportStorage();
+    }
+
+    private void ResetExportStorage()
+    {
+        ExportStorage = new ExportStorage();
+        ExportStorage.ExportStorageDate = DateOnly.FromDateTime(DateTime.Today);
+    }
+}

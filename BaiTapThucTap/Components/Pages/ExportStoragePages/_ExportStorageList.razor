@@ -1,0 +1,59 @@
+﻿<div class="col hideWhenPrint">
+    <div class="d-flex justify-content-end my-4">
+        <button class="btn btn-primary" @onclick="()=>HandleExportStorageFormVisual.InvokeAsync(true)">Thêm phiếu xuất kho</button>
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Số phiếu xuất kho</th>
+                <th scope="col">Kho</th>
+                <th scope="col">Ngày xuất kho</th>
+                <th scope="col">Ghi chú</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ExportStorageList is null)
+            {
+                <tr>
+                    <td>Đang lấy dữ liệu...</td>
+                </tr>
+            }
+            else
+            {
+                @if (!ExportStorageList.Any())
+                {
+                    <tr>
+                        <td>Không có dữ liệu</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (ExportStorage item in ExportStorageList)
+                    {
+                        <tr>
+                            <td>@item.ExportStorageName</td>
+                            <td>@item.ExportStorageDate</td>
+                            <td>@StorageList?.Find(i => i.Id == item.StorageId)?.StorageName</td>
+                            <td>@item.Note</td>
+                            <td class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-danger" style="width: 150px" @onclick="()=>DeleteExportStorage.InvokeAsync(item.Id)">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<ExportStorage> ExportStorageList { get; set; }
+    [Parameter]
+    public List<Storage> StorageList { get; set; }
+    [Parameter]
+    public EventCallback<bool> HandleExportStorageFormVisual { get; set; }
+    [Parameter]
+    public EventCallback<int> DeleteExportStorage { get; set; }
+}
