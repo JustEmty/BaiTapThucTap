@@ -37,7 +37,7 @@
                             <td>@item.Note</td>
                             <td class="d-flex flex-wrap gap-1">
                                 <button class="btn btn-primary" style="width: 150px" @onclick="()=>{OnLoad(item.Id); OnSetEditFormMode(true);}">Hiệu chỉnh thông tin phiếu nhập</button>
-                                <button class="btn btn-success" style="width: 150px" @onclick="()=>OnEdit(item.Id)">Hiệu chỉnh chi tiết phiếu nhập</button>
+                                <button class="btn btn-success" style="width: 150px" @onclick="()=>{OnLoad(item.Id); OnEdit(item.Id);}">Hiệu chỉnh chi tiết phiếu nhập</button>
                                 <button class="btn btn-danger" style="width: 150px" @onclick="()=>OnDelete(item.Id)">Xóa</button>
                             </td>
                         </tr>
