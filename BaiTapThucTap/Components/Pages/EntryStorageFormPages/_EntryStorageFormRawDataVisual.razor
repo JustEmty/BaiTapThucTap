@@ -1,0 +1,59 @@
+﻿<table class="table">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Mã sản phẩm</th>
+			<th scope="col">Tên sản phẩm</th>
+			<th scope="col">Số lượng</th>
+			<th scope="col">Đơn giá</th>
+			<th scope="col">Trị giá</th>
+			<th scope="col"></th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (EntryStorageFormRawDataList is null)
+		{
+			<tr>
+				<td>Đang lấy dữ liệu...</td>
+			</tr>
+		}
+		else
+		{
+			@if (!EntryStorageFormRawDataList.Any())
+			{
+				<tr>
+					<td>Không có dữ liệu</td>
+				</tr>
+			}
+			else
+			{
+				@foreach (EntryStorageFormRawData item in EntryStorageFormRawDataList)
+				{
+					<tr>
+						<td>@item.ProductId</td>
+						<td>@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
+						<td>@item.Quantities</td>
+						<td>@item.Price</td>
+						<td>@(item.Price * item.Quantities)</td>
+						<td class="d-flex flex-wrap gap-1">
+							<button class="btn btn-success" style="width: 150px" @onclick="()=>{LoadEntryStorageFormRawData.InvokeAsync(item.Id); HandleEditFormRawDataVisual.InvokeAsync(true);}">Sửa</button>
+							<button class="btn btn-danger" style="width: 150px" @onclick="()=>DeleteEntryStorageFormRawData.InvokeAsync(item.Id)">Xóa</button>
+						</td>
+					</tr>
+				}
+			}
+		}
+	</tbody>
+</table>
+
+@code {
+	[Parameter]
+	public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; }
+	[Parameter]
+	public List<Product> ProductList { get; set; }
+	[Parameter]
+	public EventCallback<int> LoadEntryStorageFormRawData { get; set; }
+	[Parameter] 
+	public EventCallback<bool> HandleEditFormRawDataVisual { get; set; }
+	[Parameter]
+	public EventCallback<int> DeleteEntryStorageFormRawData { get; set; }
+}

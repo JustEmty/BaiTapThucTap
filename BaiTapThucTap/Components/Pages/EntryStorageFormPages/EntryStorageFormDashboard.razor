@@ -6,6 +6,7 @@
 @inject ISupplierRepository supplierRepository
 @inject IExportEntryStorageFormRepository exportEntryStorageFormRepository
 @inject IProductRepository productRepository
+@inject ICalculationUnitRepository calculationUnitRepository
 @inject IJSRuntime ijsRuntime
 
 <h3 class="hideWhenPrint">Quản lý phiếp nhập</h3>
@@ -23,7 +24,7 @@
 	@if (!isEditDetailFormMode)
 	{
 		<div class="col-4 hideWhenPrint">
-			<EditForm Model="EntryStorageForm" OnValidSubmit="OnSubmit" FormName="Header">
+			<EditForm Model="EntryStorageForm" OnValidSubmit="OnSubmitEntryStorageForm" FormName="Header">
 				<DataAnnotationsValidator />
 				<div class="form-group">
 					<label for="entryStorageFormId">Số phiếu nhập</label>
@@ -88,68 +89,24 @@
 	}
 	@if (isEditDetailFormMode)
 	{
-		<div class="col hideWhenPrint">
-			<div>
-				<button class="btn btn-secondary">Quay lại</button>
-				<button class="btn btn-primary" @onclick="ShowEditFormRawDataVisual">Thêm sản phẩm</button>
-			</div>
+		<div class="col-5 hideWhenPrint">
 			@if (!showEditFormRawData)
 			{
-				<table class="table">
-					<thead class="thead-dark">
-						<tr>
-							<th scope="col">Mã sản phẩm</th>
-							<th scope="col">Tên sản phẩm</th>
-							<th scope="col">Số lượng</th>
-							<th scope="col">Đơn giá</th>
-							<th scope="col">Trị giá</th>
-							<th scope="col"></th>
-						</tr>
-					</thead>
-					<tbody>
-						@if (EntryStorageFormRawDataList is null)
-						{
-							<tr>
-								<td>Đang lấy dữ liệu...</td>
-							</tr>
-						}
-						else
-						{
-							@if (!EntryStorageFormRawDataList.Any())
-							{
-								<tr>
-									<td>Không có dữ liệu</td>
-								</tr>
-							}
-							else
-							{
-								@foreach (EntryStorageFormRawData item in EntryStorageFormRawDataList)
-								{
-									<tr>
-										<td>@item.ProductId</td>
-										<td>@ProductList.Find(i => i.Id == item.ProductId).ProductName</td>
-										<td>@item.Quantities</td>
-										<td>@item.Price</td>
-										<td>@(item.Price * item.Quantities)</td>
-										<td class="d-flex flex-wrap gap-1">
-											<button class="btn btn-danger" style="width: 150px" >Sửa</button>
-											<button class="btn btn-success" style="width: 150px" >Xóa</button>
-										</td>
-									</tr>
-								}
-							}
-						}
-					</tbody>
-				</table>
+				<div>
+					<button class="btn btn-secondary" @onclick="CancelEditDetailFormMode">Quay lại</button>
+					<button class="btn btn-primary" @onclick="()=>HandleEditFormRawDataVisual(true)">Thêm sản phẩm</button>
+				</div>
+				<_EntryStorageFormRawDataVisual EntryStorageFormRawDataList="EntryStorageFormRawDataList" ProductList="ProductList" LoadEntryStorageFormRawData="LoadEntryStorageFormRawData"
+												HandleEditFormRawDataVisual="HandleEditFormRawDataVisual" DeleteEntryStorageFormRawData="DeleteEntryStorageFormRawData" />
 			}
 			else
 			{
 				<div class="col-4 hideWhenPrint">
-					<EditForm Model="EntryStorageFormRawData" FormName="Detail">
+					<EditForm Model="EntryStorageFormRawData" OnValidSubmit="OnSubmitEntryStorageFormRawData" FormName="Detail">
 						<DataAnnotationsValidator />
 						<div class="form-group">
 							<label for="productId">Mã sản phẩm</label>
-							<InputSelect @bind-Value="EntryStorageFormRawData.ProductId" class="form-control" id="productName">
+							<InputSelect @bind-Value="EntryStorageFormRawData.ProductId" class="form-control" id="productName" disabled="@isDisabled">
 								<option value="">--- Chọn sản phẩm ---</option>
 								@if (StorageList is not null)
 								{
@@ -163,6 +120,7 @@
 									<option>Đang tải dữ liệu...</option>
 								}
 							</InputSelect>
+							<p class="text-danger">@errorProductMessage</p>
 						</div>
 						<div class="form-group">
 							<label for="quantities">Tên sản phẩm</label>
@@ -171,13 +129,15 @@
 						<div class="form-group">
 							<label for="quantities">Số lượng</label>
 							<InputNumber @bind-Value="EntryStorageFormRawData.Quantities" class="form-control" id="quantities" />
+							<ValidationMessage For="@(()=>EntryStorageFormRawData.Quantities)"/>
 						</div>
 						<div class="form-group">
 							<label for="price">Đơn giá</label>
 							<InputNumber @bind-Value="EntryStorageFormRawData.Price" class="form-control" id="price" />
+							<ValidationMessage For="@(()=>EntryStorageFormRawData.Price)" />
 						</div>
-						<button type="reset" class="btn btn-secondary mt-4 me-2">Hủy</button>
-						<button type="submit" class="btn btn-primary mt-4">Thêm</button>
+						<button type="reset" class="btn btn-secondary mt-4 me-2" @onclick="()=>{HandleEditFormRawDataVisual(false); Reset();}">Hủy</button>
+						<button type="submit" class="btn btn-primary mt-4">@(EntryStorageFormRawData.Id > 0 ? "Sửa" : "Thêm")</button>
 					</EditForm>
 				</div>
 			}
@@ -188,7 +148,10 @@
 		<_EntryStorageFormVisual PrintForm="PrintForm"
 								 EntryStorageForm="EntryStorageForm"
 								 StorageList="StorageList"
-								 SuppliersList="SupplierList"/>
+								 SuppliersList="SupplierList"
+								 CalculationUnitList="CalculationUnitList"
+								 ProductList="ProductList"
+								 EntryStorageFormRawDataList="EntryStorageFormRawDataList"/>
 	}
 </div>
 
@@ -200,6 +163,7 @@
 
 	public List<EntryStorageForm> EntryStorageFormList { get; set; }
 	public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; }
+	public List<CalculationUnit> CalculationUnitList { get; set; }
 	public List<Storage> StorageList { get; set; }
 	public List<Supplier> SupplierList { get; set; }
 	public List<Product> ProductList { get; set; }
@@ -207,9 +171,11 @@
 	private string errorEntryStorageFormMessage = string.Empty;
 	private string errorStorageMessage = string.Empty;
 	private string errorSupplierMessage = string.Empty;
+	private string errorProductMessage = string.Empty;
 	private bool isEditHeaderFormMode;
 	private bool isEditDetailFormMode;
 	private bool showEditFormRawData;
+	private bool isDisabled;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -218,14 +184,16 @@
 		if (firstRender)
 		{
 			SetEditHeaderFormMode(false);
-			showEditFormRawData = false;
+			HandleEditFormRawDataVisual(false);
 			isEditDetailFormMode = false;
+			isDisabled = false;
 			EntryStorageForm.EntryStorageFormDate = DateOnly.FromDateTime(DateTime.Today);
 			await LoadEntryStorageFormList();
 			await LoadEntryStorageFormRawDataList();
 			await LoadStorageList();
 			await LoadSupplierList();
 			await LoadProductList();
+			await LoadCalculationUnitList();
 			await InvokeAsync(StateHasChanged);
 		}
 	}
@@ -255,6 +223,11 @@
 		ProductList = await productRepository.GetAllAsync();
 	}
 
+	private async Task LoadCalculationUnitList()
+	{
+		CalculationUnitList = await calculationUnitRepository.GetAllAsync();
+	}
+
 	private async Task LoadEntryStorageForm(int id)
 	{
 		Reset();
@@ -264,6 +237,9 @@
 	private async void EditEntryStorageFormRawData(int id)
 	{
 		isEditDetailFormMode = true;
+		await LoadEntryStorageForm(id);
+		await InvokeAsync(StateHasChanged);
+		EntryStorageFormRawData.StorageId = EntryStorageForm.StorageId;
 	}
 
 	private async Task CreateEntryStorageForm()
@@ -327,7 +303,7 @@
 		Reset();
 	}
 
-	private async Task OnSubmit()
+	private async Task OnSubmitEntryStorageForm()
 	{
 		if (EntryStorageForm.Id > 0)
 		{
@@ -380,8 +356,69 @@
 		return true;
 	}
 
-	private void ShowEditFormRawDataVisual()
+	private void HandleEditFormRawDataVisual(bool isShow)
 	{
-		showEditFormRawData = true;
+		showEditFormRawData = isShow;
 	}
+
+	private void CancelEditDetailFormMode()
+	{
+		isEditDetailFormMode = false;
+	}
+
+	private async Task CreateEntryStorageFormRawData()
+	{
+		errorProductMessage = string.Empty;
+		if(EntryStorageFormRawData.ProductId <= 0)
+		{
+			errorProductMessage = "Mã sản phẩm không được để trống";
+			return;
+		}
+		await entryStorageFormRawDataRepository.CreateAsync(EntryStorageFormRawData);
+		await LoadEntryStorageFormRawDataList();
+		HandleEditFormRawDataVisual(false);
+	}
+
+	private async Task LoadEntryStorageFormRawData(int id)
+	{
+		ResetEntryStorageFormRawData();
+		EntryStorageFormRawData = await entryStorageFormRawDataRepository.GetAsync(id);
+		isDisabled = true;
+	}
+
+	private async Task UpdateEntryStorageFormRawData()
+	{
+		await entryStorageFormRawDataRepository.UpdateAsync(EntryStorageFormRawData);
+		await LoadEntryStorageFormRawDataList();
+		ResetEntryStorageFormRawData();
+		HandleEditFormRawDataVisual(false);
+		isDisabled = false;
+	}
+
+	private async Task DeleteEntryStorageFormRawData(int id)
+	{
+		await LoadEntryStorageFormRawData(id);
+		await entryStorageFormRawDataRepository.DeleteAsync(EntryStorageFormRawData);
+		await LoadEntryStorageFormRawDataList();
+		ResetEntryStorageFormRawData();
+		isDisabled = false;
+	}
+
+	private async Task OnSubmitEntryStorageFormRawData()
+	{
+		if(EntryStorageFormRawData.Id > 0)
+		{
+			await UpdateEntryStorageFormRawData();
+		}
+		else
+		{
+			await CreateEntryStorageFormRawData();
+		}
+	}
+
+	private void ResetEntryStorageFormRawData()
+	{
+		EntryStorageFormRawData = new EntryStorageFormRawData();
+	}
+
 }
