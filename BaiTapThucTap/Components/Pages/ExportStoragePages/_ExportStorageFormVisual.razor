@@ -1,0 +1,69 @@
+﻿<div class="col-8">
+    <h2 class="text-center fw-bold m-0">PHIẾU XUẤT KHO</h2>
+    <p class="text-center m-0">Ngày @ExportStorage.ExportStorageDate.Day tháng @ExportStorage.ExportStorageDate.Month năm @ExportStorage.ExportStorageDate.Year</p>
+    <p class="text-center fw-bold m-0">Số: @ExportStorage.ExportStorageName/@ExportStorage.ExportStorageDate.Year</p>
+    <p class="fw-bold m-0">I. Thông tin chung</p>
+    <section class="d-flex flex-row mb-4">
+        <div class="me-2">
+            <p class="m-0">1. Lệnh giao hàng: </p>
+            <p class="m-0">2. Cửa hàng: </p>
+            <p class="m-0">3. Kho: </p>
+            <p class="m-0">4. Ghi chú: </p>
+        </div>
+        <div>
+            <p class="m-0 fw-bold">Chưa có</p>
+            <p class="m-0 fw-bold">Chưa có</p>
+            <p class="m-0 fw-bold">@StorageList?.Find(i => i.Id == ExportStorage.StorageId)?.StorageName</p>
+            <p class="m-0 fw-bold">@ExportStorage.Note</p>
+        </div>
+    </section>
+    <p class="fw-bold m-0">II. Thông tin hàng</p>
+    <section class="mb-4">
+        <table class="table">
+            <thead style="background-color: yellow">
+                <tr style="border-width:2px; border-color:black">
+                    <th class="text-center" style="border-width:2px; border-color:black">STT</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">Mã Hàng</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">Tên Hàng</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">PO</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">Số Chỉ Lệnh</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">SL</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">ĐVT</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">Kiểm Kê</th>
+                    <th class="text-center" style="border-width:2px; border-color:black">Ghi Chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-width:2px; border-color:black">
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <p class="fw-bold m-0">III. Kết luận</p>
+    <p class="m-0">1. Tổng số lương thực xuất (viết bằng số): </p>
+    <p class="m-0">2. Tổng số lương thực xuất (viết bằng chữ): </p>
+    <p class="m-0">3. Mô tả khác biệt: </p>
+    <div style="width:100%;height:5rem;border:2px solid black;"></div>
+    <section class="d-flex justify-content-around mt-4">
+        <p class="fw-bold">Người lập phiếu</p>
+        <p class="fw-bold">Người nhận hàng</p>
+        <p class="fw-bold">Điều phối</p>
+        <p class="fw-bold">Giám đốc</p>
+    </section>
+</div>
+
+@code {
+    [Parameter]
+    public ExportStorage ExportStorage { get; set; }
+    [Parameter]
+    public List<Storage> StorageList { get; set; }
+}

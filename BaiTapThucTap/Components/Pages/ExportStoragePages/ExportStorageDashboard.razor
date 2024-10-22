@@ -3,54 +3,60 @@
 @inject IExportStorageRepository exportStorageRepository
 @inject IStorageRepository storageRepository
 
-<h3>Quản lý phiếu xuất</h3>
-@if (!isAddMode)
+@if (!hideExportStorageList)
 {
-    <_ExportStorageList DeleteExportStorage="DeleteExportStorage" ExportStorageList="ExportStorageList" HandleExportStorageFormVisual="HandleExportStorageFormVisual" StorageList="StorageList"/>
+    <_ExportStorageList DeleteExportStorage="DeleteExportStorage" ExportStorageList="ExportStorageList" HandleExportStorageListVisual="HandleExportStorageListVisual" StorageList="StorageList"
+                        LoadExportStorage="LoadExportStorage" HandleExportStorageFormVisual="HandleExportStorageFormVisual"/>
 }
 else
 {
-    <div class="col hideWhenPrint">
-        <EditForm Model="ExportStorage" OnValidSubmit="OnSubmit">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="exportStorageName">Số phiếu xuất</label>
-                <InputText @bind-Value="ExportStorage.ExportStorageName" class="form-control" id="exportStorageName" placeholder="12345679abc..." />
-                <ValidationMessage For="@(()=>ExportStorage.ExportStorageName)" />
-                <p class="text-danger">@errorStorageId</p>
-            </div>
-            <div class="form-group">
-                <label for="storageId">Kho</label>
-                <InputSelect @bind-Value="ExportStorage.StorageId" class="form-control" id="storageId">
-                    <option value="">--- Chọn kho ---</option>
-                    @if (StorageList is not null)
-                    {
-                        @foreach (Storage item in StorageList)
-                        {
-                            <option value="@item.Id">@item.StorageName</option>
-                        }
-                    }
-                    else
-                    {
-                        <option>Đang tải dữ liệu...</option>
-                    }
-                </InputSelect>
-                <p class="text-danger">@errorStorageMessage</p>
-            </div>
-            <div class="form-group">
-                <label for="entryStorageDate">Ngày nhập kho:</label>
-                <div class="col-md-10">
-                    <InputDate @bind-Value="ExportStorage.ExportStorageDate" id="entryStorageDate" class="form-control" />
-                    <ValidationMessage For="@(() => ExportStorage.ExportStorageDate)" />
+    <div class="row">
+        <div class="col hideWhenPrint">
+            <EditForm Model="ExportStorage" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="exportStorageName">Số phiếu xuất</label>
+                    <InputText @bind-Value="ExportStorage.ExportStorageName" class="form-control" id="exportStorageName" placeholder="12345679abc..." />
+                    <ValidationMessage For="@(()=>ExportStorage.ExportStorageName)" />
+                    <p class="text-danger">@errorStorageId</p>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="note">Ghi chú</label>
-                <InputTextArea @bind-Value="ExportStorage.Note" class="form-control" id="note" rows="3"></InputTextArea>
-            </div>
-            <button type="submit" class="btn btn-secondary mt-4">Quay lại</button>
-            <button type="submit" class="btn btn-primary mt-4">Thêm</button>
-        </EditForm>
+                <div class="form-group">
+                    <label for="storageId">Kho</label>
+                    <InputSelect @bind-Value="ExportStorage.StorageId" class="form-control" id="storageId">
+                        <option value="">--- Chọn kho ---</option>
+                        @if (StorageList is not null)
+                        {
+                            @foreach (Storage item in StorageList)
+                            {
+                                <option value="@item.Id">@item.StorageName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Đang tải dữ liệu...</option>
+                        }
+                    </InputSelect>
+                    <p class="text-danger">@errorStorageMessage</p>
+                </div>
+                <div class="form-group">
+                    <label for="entryStorageDate">Ngày nhập kho:</label>
+                    <div class="col-md-10">
+                        <InputDate @bind-Value="ExportStorage.ExportStorageDate" id="entryStorageDate" class="form-control" />
+                        <ValidationMessage For="@(() => ExportStorage.ExportStorageDate)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú</label>
+                    <InputTextArea @bind-Value="ExportStorage.Note" class="form-control" id="note" rows="3"></InputTextArea>
+                </div>
+                <button type="reset" class="btn btn-secondary mt-4" @onclick="()=>{ResetExportStorage(); HandleExportStorageListVisual(false);}">Quay lại</button>
+                <button type="submit" class="btn btn-primary mt-4">Thêm</button>
+            </EditForm>
+        </div>
+        @if (showExportStorageForm)
+        {
+            <_ExportStorageFormVisual ExportStorage="ExportStorage" StorageList="StorageList" />
+        }
     </div>
 }
 
@@ -62,7 +68,8 @@ else
     public List<ExportStorage> ExportStorageList { get; set; }
     public List<Storage> StorageList { get; set; }
 
-    private bool isAddMode;
+    private bool hideExportStorageList;
+    private bool showExportStorageForm;
     private string errorStorageMessage = string.Empty;
     private string errorStorageId = string.Empty;
 
@@ -70,6 +77,7 @@ else
     {
         if (firstRender)
         {
+            HandleExportStorageListVisual(false);
             HandleExportStorageFormVisual(false);
             ResetExportStorage();
             await LoadExportStorageList();
@@ -88,6 +96,11 @@ else
         StorageList = await storageRepository.GetAllAsync();
     }
 
+    private async Task LoadExportStorage(int id)
+    {
+        ExportStorage = await exportStorageRepository.GetAsync(id);
+    }
+
     private async Task CreateExportStorage()
     {
         errorStorageMessage = string.Empty;
@@ -103,7 +116,7 @@ else
         {
             await exportStorageRepository.CreateAsync(ExportStorage);
             await LoadExportStorageList();
-            HandleExportStorageFormVisual(false);
+            HandleExportStorageListVisual(false);
         }
         catch (DbUpdateException dbUpdateException)
         {
@@ -116,9 +129,9 @@ else
         await LoadExportStorageList();
     }
 
-    private void HandleExportStorageFormVisual(bool isShow)
+    private void HandleExportStorageListVisual(bool isShow)
     {
-        isAddMode = isShow;
+        hideExportStorageList = isShow;
     }
 
     private async Task OnSubmit()
@@ -130,5 +143,10 @@ else
     {
         ExportStorage = new ExportStorage();
         ExportStorage.ExportStorageDate = DateOnly.FromDateTime(DateTime.Today);
+    }
+
+    private void HandleExportStorageFormVisual(bool isShow)
+    {
+        showExportStorageForm = isShow;
     }
 }

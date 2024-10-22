@@ -1,6 +1,7 @@
-﻿<div class="col hideWhenPrint">
+﻿<h3>Quản lý phiếu xuất</h3>
+<div class="col hideWhenPrint">
     <div class="d-flex justify-content-end my-4">
-        <button class="btn btn-primary" @onclick="()=>HandleExportStorageFormVisual.InvokeAsync(true)">Thêm phiếu xuất kho</button>
+        <button class="btn btn-primary" @onclick="()=>HandleExportStorageListVisual.InvokeAsync(true)">Thêm phiếu xuất kho</button>
     </div>
     <table class="table">
         <thead class="thead-dark">
@@ -37,6 +38,7 @@
                             <td>@StorageList?.Find(i => i.Id == item.StorageId)?.StorageName</td>
                             <td>@item.Note</td>
                             <td class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-primary" @onclick="()=>{HandleExportStorageListVisual.InvokeAsync(true); LoadExportStorage.InvokeAsync(item.Id); HandleExportStorageFormVisual.InvokeAsync(true);}">Hiệu chỉnh thông tin xuất</button>
                                 <button class="btn btn-danger" style="width: 150px" @onclick="()=>DeleteExportStorage.InvokeAsync(item.Id)">Xóa</button>
                             </td>
                         </tr>
@@ -53,7 +55,11 @@
     [Parameter]
     public List<Storage> StorageList { get; set; }
     [Parameter]
-    public EventCallback<bool> HandleExportStorageFormVisual { get; set; }
+    public EventCallback<bool> HandleExportStorageListVisual { get; set; }
     [Parameter]
     public EventCallback<int> DeleteExportStorage { get; set; }
+    [Parameter]
+    public EventCallback<int> LoadExportStorage { get; set; }
+    [Parameter]
+    public EventCallback<bool> HandleExportStorageFormVisual { get; set; }
 }
