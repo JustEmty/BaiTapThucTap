@@ -1,4 +1,7 @@
-﻿<div class="col-8">
+﻿<div class="col">
+    <div class="d-flex justify-content-end hideWhenPrint">
+        <button class="btn btn-primary hideWhenPrint" @onclick="PrintForm">In Phiếu Xuất Kho</button>
+    </div>
     <h2 class="text-center fw-bold m-0">PHIẾU XUẤT KHO</h2>
     <p class="text-center m-0">Ngày @ExportStorage.ExportStorageDate.Day tháng @ExportStorage.ExportStorageDate.Month năm @ExportStorage.ExportStorageDate.Year</p>
     <p class="text-center fw-bold m-0">Số: @ExportStorage.ExportStorageName/@ExportStorage.ExportStorageDate.Year</p>
@@ -34,17 +37,20 @@
                 </tr>
             </thead>
             <tbody>
-                <tr style="border-width:2px; border-color:black">
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                    <td class="text-center" style="border-width:2px; border-color:black">01</td>
-                </tr>
+                @foreach (ExportStorageRawData item in ExportStorageRawDataList)
+                {
+                    <tr style="border-width:2px; border-color:black">
+                        <td class="text-center" style="border-width:2px; border-color:black">@(ExportStorageRawDataList.IndexOf(item) + 1)</td>
+                        <td class="text-center" style="border-width:2px; border-color:black">@item.ProductId</td>
+                        <td class="text-center" style="border-width:2px; border-color:black">@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
+                        <td class="text-center" style="border-width:2px; border-color:black"></td>
+                        <td class="text-center" style="border-width:2px; border-color:black"></td>
+                        <td class="text-center" style="border-width:2px; border-color:black">@item.Quantities</td>
+                        <td class="text-center" style="border-width:2px; border-color:black">@CalculationUnitList?.Find(i => i.Id == (ProductList?.Find(i => i.Id == item.ProductId)?.CalculationUnitId))?.CalculationUnitName</td>
+                        <td class="text-center" style="border-width:2px; border-color:black"></td>
+                        <td class="text-center" style="border-width:2px; border-color:black"></td>
+                    </tr>
+                }
             </tbody>
         </table>
     </section>
@@ -66,4 +72,12 @@
     public ExportStorage ExportStorage { get; set; }
     [Parameter]
     public List<Storage> StorageList { get; set; }
+    [Parameter]
+    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; }
+    [Parameter]
+    public List<Product> ProductList { get; set; }
+    [Parameter]
+    public List<CalculationUnit> CalculationUnitList { get; set; }
+    [Parameter]
+    public EventCallback PrintForm { get; set; }
 }

@@ -19,6 +19,8 @@ builder.Services.AddScoped<IEntryStorageFormRepository, EntryStorageFormReposito
 builder.Services.AddScoped<IEntryStorageFormRawDataRepository, EntryStorageFormRawDataRepository>();
 builder.Services.AddScoped<IExportEntryStorageFormRepository, ExportEntryStorageFormRepository>();
 builder.Services.AddScoped<IExportStorageRepository, ExportStorageRepository>();
+builder.Services.AddScoped<IXNKExportStorageRepository, XNKExportStorageRepository>();
+builder.Services.AddScoped<IExportStorageRawDataRepository, ExportStorageRawDataRepository>();
 
 var app = builder.Build();
 

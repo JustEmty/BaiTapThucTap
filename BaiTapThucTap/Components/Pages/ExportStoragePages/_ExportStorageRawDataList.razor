@@ -1,0 +1,70 @@
+﻿<div class="col hideWhenPrint">
+    <div class="d-flex justify-content-between my-4">
+        <button class="btn btn-secondary" @onclick="()=>HandleExportStorageListVisual.InvokeAsync(false)">Quay lại</button>
+        <button class="btn btn-primary" @onclick="()=>{HandleExportStorageRawDataForm.InvokeAsync(true); SetDisabled.InvokeAsync(false);}">Thêm sản phẩm</button>
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Mã sản phẩm</th>
+                <th scope="col">Tên sản phẩm</th>
+                <th scope="col">Số lượng</th>
+                <th scope="col">Đơn giá</th>
+                <th scope="col">Trị giá</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ExportStorageRawDataList is null)
+            {
+                <tr>
+                    <td>Đang lấy dữ liệu...</td>
+                </tr>
+            }
+            else
+            {
+                @if (!ExportStorageRawDataList.Any())
+                {
+                    <tr>
+                        <td>Không có dữ liệu</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (ExportStorageRawData item in ExportStorageRawDataList)
+                    {
+                        <tr>
+                            <td>@item.ProductId</td>
+                            <td>@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
+                            <td>@item.Quantities</td>
+                            <td>@item.Price</td>
+                            <td>@(item.Quantities * item.Price)</td>
+                            <td class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-primary" @onclick="()=>{HandleExportStorageRawDataForm.InvokeAsync(true); LoadExportStorageRawData.InvokeAsync(item.Id); SetDisabled.InvokeAsync(true);}">Sửa</button>
+                                <button class="btn btn-danger" @onclick="()=>DeleteExportStorageRawData.InvokeAsync(item.Id)">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; }
+    [Parameter]
+    public List<Product> ProductList { get; set; }
+    [Parameter]
+    public EventCallback<bool> HandleExportStorageRawDataForm { get; set; }
+    [Parameter]
+    public EventCallback<bool> SetDisabled { get; set; }
+    [Parameter]
+    public EventCallback<bool> HandleExportStorageListVisual { get; set; }
+    [Parameter]
+    public EventCallback<int> LoadExportStorageRawData { get; set; }
+    [Parameter]
+    public EventCallback<int> DeleteExportStorageRawData { get; set; }
+
+}
