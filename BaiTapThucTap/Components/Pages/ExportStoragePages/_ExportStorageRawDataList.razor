@@ -1,7 +1,7 @@
 ﻿<div class="col hideWhenPrint">
     <div class="d-flex justify-content-between my-4">
-        <button class="btn btn-secondary" @onclick="()=>HandleExportStorageListVisual.InvokeAsync(false)">Quay lại</button>
-        <button class="btn btn-primary" @onclick="()=>{HandleExportStorageRawDataForm.InvokeAsync(true); SetDisabled.InvokeAsync(false);}">Thêm sản phẩm</button>
+        <button class="btn btn-secondary" @onclick="()=>{HandleExportStorageListVisual.InvokeAsync(false); ResetExportStorage.InvokeAsync();}">Quay lại</button>
+        <button class="btn btn-primary" @onclick="async ()=>{await HandleExportStorageRawDataForm.InvokeAsync(true); await SetDisabled.InvokeAsync(false);}">Thêm sản phẩm</button>
     </div>
     <table class="table">
         <thead class="thead-dark">
@@ -53,6 +53,8 @@
 
 @code {
     [Parameter]
+    public ExportStorage ExportStorage { get; set; }
+    [Parameter]
     public List<ExportStorageRawData> ExportStorageRawDataList { get; set; }
     [Parameter]
     public List<Product> ProductList { get; set; }
@@ -66,5 +68,8 @@
     public EventCallback<int> LoadExportStorageRawData { get; set; }
     [Parameter]
     public EventCallback<int> DeleteExportStorageRawData { get; set; }
-
+    [Parameter]
+    public EventCallback ResetExportStorage { get; set; }
+    [Parameter]
+    public EventCallback LoadExportStorage { get; set; }
 }

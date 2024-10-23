@@ -31,6 +31,11 @@ namespace BaiTapThucTap.Repositories
             return await applicationDbContext.ExportStorageRawDatas.ToListAsync();
         }
 
+        public async Task<List<ExportStorageRawData>> GetAllSortedDataAsync(int exportStorageFormId)
+        {
+            return await applicationDbContext.ExportStorageRawDatas.Where(i => i.ExportStorageId == exportStorageFormId).ToListAsync();
+        }
+
         public async Task<ExportStorageRawData?> GetAsync(int id)
         {
             return await applicationDbContext.ExportStorageRawDatas.Where(i => i.Id == id).FirstOrDefaultAsync();

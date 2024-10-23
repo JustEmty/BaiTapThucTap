@@ -36,6 +36,9 @@ namespace BaiTapThucTap.Data
             modelBuilder.Entity<EntryStorageFormRawData>().HasOne(r => r.EntryStorageForm).WithMany().HasForeignKey(r => r.EntryStorageFormId).OnDelete(DeleteBehavior.ClientSetNull);
             modelBuilder.Entity<EntryStorageFormRawData>().HasOne(r => r.Storage).WithMany().HasForeignKey(r => r.StorageId).OnDelete(DeleteBehavior.ClientSetNull); 
             modelBuilder.Entity<EntryStorageFormRawData>().HasOne(r => r.Product).WithMany().HasForeignKey(r => r.ProductId).OnDelete(DeleteBehavior.ClientSetNull); 
+            
+            modelBuilder.Entity<ExportStorageRawData>().HasOne(r => r.ExportStorage).WithMany().HasForeignKey(r => r.ExportStorageId).OnDelete(DeleteBehavior.ClientSetNull);
+            modelBuilder.Entity<ExportStorageRawData>().HasOne(r => r.Product).WithMany().HasForeignKey(r => r.ProductId).OnDelete(DeleteBehavior.ClientSetNull); 
         }
     }
 }

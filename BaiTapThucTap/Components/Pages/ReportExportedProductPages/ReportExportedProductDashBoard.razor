@@ -1,10 +1,9 @@
-﻿@page "/report-imported-product-dashboard"
-@inject IEntryStorageFormRawDataRepository entryStorageFormRawDataRepository
-@inject IEntryStorageFormRepository entryStorageFormRepository
-@inject ISupplierRepository supplierRepository
+﻿@page "/report-exported-product-dashboard"
 @inject IProductRepository productRepository
+@inject IExportStorageRepository exportStorageRepository
+@inject IExportStorageRawDataRepository exportStorageRawDataRepository
 
-<h3>Báo cáo chi tiết hàng nhập</h3>
+<h3>Báo cáo chi tiết hàng xuất</h3>
 <div class="row">
     <div class="col-3">
         <EditForm Model="this" OnSubmit="OnSearch">
@@ -23,25 +22,23 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">Ngày nhập</th>
-                    <th scope="col">Số phiếu nhập</th>
-                    <th scope="col">NCC</th>
+                    <th scope="col">Ngày xuất</th>
+                    <th scope="col">Số phiếu xuất</th>
                     <th scope="col">Mã sản phẩm</th>
                     <th scope="col">Tên sản phẩm</th>
-                    <th scope="col">SL Nhập</th>
+                    <th scope="col">SL xuất</th>
                     <th scope="col">Đơn giá</th>
                     <th scope="col">Trị giá</th>
                 </tr>
             </thead>
-            <tbody>    
+            <tbody>
                 @if (sortEntryStorageFormRawData.Count() > 0)
                 {
                     @foreach (var item in sortEntryStorageFormRawData)
                     {
                         <tr>
-                            <td>@sortEntryStorageFormData?.Find(i => i.Id == item.EntryStorageFormId)?.EntryStorageFormDate</td>
-                            <td>@item.EntryStorageFormId</td>
-                            <td>@SupplierList?.Find(i => i.Id == (sortEntryStorageFormData?.Find(i => i.Id == item.EntryStorageFormId)?.SupplierId))?.SupplierName</td>
+                            <td>@ExportStorageList?.Find(i => i.Id == item.ExportStorageId)?.ExportStorageDate</td>
+                            <td>@ExportStorageList?.Find(i => i.Id == item.ExportStorageId)?.ExportStorageName</td>
                             <td>@item.ProductId</td>
                             <td>@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
                             <td>@item.Quantities</td>
@@ -54,7 +51,7 @@
                 {
                     <tr>
                         <td colspan="8">Không tìm thấy phiếu nhập</td>
-                    </tr>   
+                    </tr>
                 }
             </tbody>
         </table>
@@ -65,21 +62,19 @@
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-    public List<EntryStorageForm> EntryStorageFormList { get; set; } = new List<EntryStorageForm>();
-    public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; } = new List<EntryStorageFormRawData>();
-    public List<Supplier> SupplierList { get; set; } = new List<Supplier>();
+    public List<ExportStorage> ExportStorageList { get; set; } = new List<ExportStorage>();
+    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; } = new List<ExportStorageRawData>();
     public List<Product> ProductList { get; set; } = new List<Product>();
 
-    private List<EntryStorageForm> sortEntryStorageFormData = new List<EntryStorageForm>();
-    public List<EntryStorageFormRawData> sortEntryStorageFormRawData = new List<EntryStorageFormRawData>();
+    private List<ExportStorage> sortExportStorage = new List<ExportStorage>();
+    private List<ExportStorageRawData> sortEntryStorageFormRawData = new List<ExportStorageRawData>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            EntryStorageFormRawDataList = await entryStorageFormRawDataRepository.GetAllAsync();
-            EntryStorageFormList = await entryStorageFormRepository.GetAllAsync();
-            SupplierList = await supplierRepository.GetAllAsync();
+            ExportStorageList = await exportStorageRepository.GetAllAsync();
+            ExportStorageRawDataList = await exportStorageRawDataRepository.GetAllAsync();
             ProductList = await productRepository.GetAllAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -87,12 +82,7 @@
 
     private void OnSearch()
     {
-        sortEntryStorageFormData = EntryStorageFormList
-            .Where(i => i.EntryStorageFormDate >= StartDate && i.EntryStorageFormDate <= EndDate)
-            .ToList();
-
-        sortEntryStorageFormRawData = EntryStorageFormRawDataList
-            .Where(i => sortEntryStorageFormData.Any(s => s.Id == i.EntryStorageFormId))
-            .ToList();
+        sortExportStorage = ExportStorageList.Where(i => i.ExportStorageDate >= StartDate && i.ExportStorageDate <= EndDate).ToList();
+        sortEntryStorageFormRawData = ExportStorageRawDataList.Where(i => sortExportStorage.Any(s => s.Id == i.ExportStorageId)).ToList();
     }
 }

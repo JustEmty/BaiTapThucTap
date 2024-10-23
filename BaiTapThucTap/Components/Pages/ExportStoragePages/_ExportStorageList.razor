@@ -1,7 +1,7 @@
 ﻿<h3>Quản lý phiếu xuất</h3>
 <div class="col hideWhenPrint">
     <div class="d-flex justify-content-end my-4">
-        <button class="btn btn-primary" @onclick="()=>HandleExportStorageListVisual.InvokeAsync(true)">Thêm phiếu xuất kho</button>
+        <button class="btn btn-primary" @onclick="async ()=>{await HandleExportStorageListVisual.InvokeAsync(true); await HandleExportStorageFormVisual.InvokeAsync(true); await HandleExportStorageRawDataListVisual.InvokeAsync(false);}">Thêm phiếu xuất kho</button>
     </div>
     <table class="table">
         <thead class="thead-dark">
@@ -39,7 +39,9 @@
                             <td>@item.Note</td>
                             <td class="d-flex flex-wrap gap-1">
                                 <button class="btn btn-primary" @onclick="()=>{HandleExportStorageListVisual.InvokeAsync(true); LoadExportStorage.InvokeAsync(item.Id); HandleExportStorageFormVisual.InvokeAsync(true); HandleExportStorageRawDataListVisual.InvokeAsync(false);}">Hiệu chỉnh thông tin xuất</button>
-                                <button class="btn btn-success" @onclick="()=>{HandleExportStorageListVisual.InvokeAsync(true); LoadExportStorage.InvokeAsync(item.Id); HandleExportStorageFormVisual.InvokeAsync(true); HandleExportStorageRawDataListVisual.InvokeAsync(true);}">Hiệu chỉnh chi tiết xuất</button>
+                                <button class="btn btn-success" @onclick="async () => await HandleEditExportAsync(item.Id)">
+                                    Hiệu chỉnh chi tiết xuất
+                                </button>
                                 <button class="btn btn-danger" style="width: 150px" @onclick="()=>DeleteExportStorage.InvokeAsync(item.Id)">Xóa</button>
                             </td>
                         </tr>
@@ -65,4 +67,15 @@
     public EventCallback<bool> HandleExportStorageFormVisual { get; set; }
     [Parameter]
     public EventCallback<bool> HandleExportStorageRawDataListVisual { get; set; }
+    [Parameter]
+    public EventCallback<int> LoadExportStorageRawDataList { get; set; }
+
+    private async Task HandleEditExportAsync(int itemId)
+    {
+        await HandleExportStorageListVisual.InvokeAsync(true);
+        await LoadExportStorage.InvokeAsync(itemId);
+        await LoadExportStorageRawDataList.InvokeAsync();
+        await HandleExportStorageFormVisual.InvokeAsync(true);
+        await HandleExportStorageRawDataListVisual.InvokeAsync(true);
+    }
 }

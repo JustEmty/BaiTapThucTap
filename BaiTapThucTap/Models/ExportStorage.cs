@@ -24,5 +24,7 @@ namespace BaiTapThucTap.Models
 		public DateOnly ExportStorageDate { get; set; }
 
 		public string? Note {  get; set; }
+
+		public List<ExportStorageRawData> ExportStorageRawDatas { get; set; }
 	}
 }

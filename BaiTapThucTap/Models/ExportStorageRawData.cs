@@ -10,7 +10,10 @@ namespace BaiTapThucTap.Models
 		[Column("Xuat_Kho_ID")]
 		public int Id { get; set; }
 
-		[ForeignKey(nameof(Product))]
+        public int ExportStorageId { get; set; }
+        public ExportStorage? ExportStorage { get; set; }
+
+        [ForeignKey(nameof(Product))]
 		[Required]
 		[Column("San_Pham_ID")]
 		public int ProductId { get; set; }

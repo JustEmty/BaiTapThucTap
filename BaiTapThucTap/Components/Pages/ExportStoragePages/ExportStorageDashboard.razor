@@ -11,7 +11,8 @@
 @if (!hideExportStorageList)
 {
     <_ExportStorageList DeleteExportStorage="DeleteExportStorage" ExportStorageList="ExportStorageList" HandleExportStorageListVisual="HandleExportStorageListVisual" StorageList="StorageList"
-                        LoadExportStorage="LoadExportStorage" HandleExportStorageFormVisual="HandleExportStorageFormVisual" HandleExportStorageRawDataListVisual="HandleExportStorageRawDataListVisual" />
+                        LoadExportStorage="LoadExportStorage" HandleExportStorageFormVisual="HandleExportStorageFormVisual" HandleExportStorageRawDataListVisual="HandleExportStorageRawDataListVisual"
+                        LoadExportStorageRawDataList="LoadExportStorageRawDataList" />
 }
 else
 {
@@ -65,7 +66,8 @@ else
                 if (!showExportStorageRawDataForm)
                 {
                     <_ExportStorageRawDataList ExportStorageRawDataList="ExportStorageRawDataList" ProductList="ProductList" HandleExportStorageRawDataForm="HandleExportStorageRawDataForm"
-                                               LoadExportStorageRawData="LoadExportStorageRawData" SetDisabled="SetDisabled" DeleteExportStorageRawData="DeleteExportStorageRawData" HandleExportStorageListVisual="HandleExportStorageListVisual"/>
+                                               LoadExportStorageRawData="LoadExportStorageRawData" SetDisabled="SetDisabled" DeleteExportStorageRawData="DeleteExportStorageRawData" 
+                                               HandleExportStorageListVisual="HandleExportStorageListVisual" ResetExportStorage="ResetExportStorage" />
                 }
                 else
                 {
@@ -125,7 +127,7 @@ else
     public ExportStorageRawData ExportStorageRawData { get; set; }
 
     public List<ExportStorage> ExportStorageList { get; set; }
-    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; }
+    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; } = new List<ExportStorageRawData>();
     public List<Storage> StorageList { get; set; }
     public List<Product> ProductList { get; set; }
     public List<CalculationUnit> CalculationUnitList { get; set; }
@@ -151,7 +153,6 @@ else
             ResetExportStorageRawData();
             SetDisabled(false);
             await LoadExportStorageList();
-            await LoadExportStorageRawDataList();
             await LoadStorageList();
             await LoadProductList();
             await LoadCalculationUnitList();
@@ -171,7 +172,7 @@ else
 
     private async Task LoadExportStorageRawDataList()
     {
-        ExportStorageRawDataList = await exportStorageRawDataRepository.GetAllAsync();
+        ExportStorageRawDataList = await exportStorageRawDataRepository.GetAllSortedDataAsync(ExportStorage.Id);
     }
 
     private async Task LoadProductList()
@@ -286,6 +287,7 @@ else
 
     private async Task OnExportStorageRawDataSubmit()
     {
+        ExportStorageRawData.ExportStorageId = ExportStorage.Id;
         if(ExportStorageRawData.Id > 0)
         {
             await UpdateExportStorageRawData();
