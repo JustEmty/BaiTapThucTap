@@ -31,5 +31,8 @@ namespace BaiTapThucTap.Models
 
         [Column("Ghi_Chu")]
         public string? Note { get; set; }
+
+        [Column("San_Pham")]
+        public List<EntryStorageFormRawData> EntryStorageFormRawData { get; set; }
     }
 }

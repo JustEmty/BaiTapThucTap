@@ -1,27 +1,101 @@
 ﻿@page "/report-imported-product-dashboard"
-@inject IExportEntryStorageFormRepository exportEntryStorageFormRepository
+@inject IEntryStorageFormRawDataRepository entryStorageFormRawDataRepository
+@inject IEntryStorageFormRepository entryStorageFormRepository
+@inject ISupplierRepository supplierRepository
+@inject IProductRepository productRepository
 
 <h3>Báo cáo chi tiết hàng nhập</h3>
-
-@foreach (var item in ExportEntryStorageFormList)
-{
-    <li>@item.EntryStorageFormId</li>
-}
+<div class="row">
+    <div class="col-3">
+        <EditForm Model="this" OnSubmit="OnSearch">
+            <div class="form-group">
+                <label for="startDate">Từ ngày</label>
+                <InputDate @bind-Value="StartDate" class="form-control" id="startDate" />
+            </div>
+            <div class="form-group">
+                <label for="startendDateDate">Đến ngày</label>
+                <InputDate @bind-Value="EndDate" class="form-control" id="endDate" />
+            </div>
+            <button class="btn btn-primary">Tìm kiếm</button>
+        </EditForm>
+    </div>
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Ngày nhập</th>
+                    <th scope="col">Số phiếu nhập</th>
+                    <th scope="col">NCC</th>
+                    <th scope="col">Mã sản phẩm</th>
+                    <th scope="col">Tên sản phẩm</th>
+                    <th scope="col">SL Nhập</th>
+                    <th scope="col">Đơn giá</th>
+                    <th scope="col">Trị giá</th>
+                </tr>
+            </thead>
+            <tbody>    
+                @if (sortEntryStorageFormRawData.Count() > 0)
+                {
+                    @foreach (var item in sortEntryStorageFormRawData)
+                    {
+                        <tr>
+                            <td>@sortEntryStorageFormData?.Find(i => i.Id == item.EntryStorageFormId)?.EntryStorageFormDate</td>
+                            <td>@item.EntryStorageFormId</td>
+                            <td>@SupplierList?.Find(i => i.Id == (sortEntryStorageFormData?.Find(i => i.Id == item.EntryStorageFormId)?.SupplierId))?.SupplierName</td>
+                            <td>@item.ProductId</td>
+                            <td>@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
+                            <td>@item.Quantities</td>
+                            <td>@item.Price</td>
+                            <td>@(item.Quantities * item.Price)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8">Không tìm thấy phiếu nhập</td>
+                    </tr>   
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @code {
-    public DateOnly startDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-    public DateOnly endDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public List<DateOnly> DateOnlyList { get; set; } = new List<DateOnly>();
     private bool isSubmitted = false;
 
-    public List<ExportEntryStorageForm> ExportEntryStorageFormList { get; set; } = new List<ExportEntryStorageForm>();
+    public List<EntryStorageForm> EntryStorageFormList { get; set; } = new List<EntryStorageForm>();
+    public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; } = new List<EntryStorageFormRawData>();
+    public List<Supplier> SupplierList { get; set; } = new List<Supplier>();
+    public List<Product> ProductList { get; set; } = new List<Product>();
+
+    private List
+    <EntryStorageForm> sortEntryStorageFormData = new List<EntryStorageForm>();
+    public List<EntryStorageFormRawData> sortEntryStorageFormRawData = new List<EntryStorageFormRawData>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            ExportEntryStorageFormList = await exportEntryStorageFormRepository.GetAllAsync();
+            EntryStorageFormRawDataList = await entryStorageFormRawDataRepository.GetAllAsync();
+            EntryStorageFormList = await entryStorageFormRepository.GetAllAsync();
+            SupplierList = await supplierRepository.GetAllAsync();
+            ProductList = await productRepository.GetAllAsync();
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private void OnSearch()
+    {
+        sortEntryStorageFormData = EntryStorageFormList
+            .Where(i => i.EntryStorageFormDate >= StartDate && i.EntryStorageFormDate <= EndDate)
+            .ToList();
+
+        sortEntryStorageFormRawData = EntryStorageFormRawDataList
+            .Where(i => sortEntryStorageFormData.Any(s => s.Id == i.EntryStorageFormId))
+            .ToList();
     }
 }

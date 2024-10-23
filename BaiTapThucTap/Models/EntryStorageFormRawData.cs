@@ -9,6 +9,10 @@ namespace BaiTapThucTap.Models
         [Key]
         public int Id { get; set; }
 
+        [ForeignKey("So_Phieu_Nhap")]
+        public int EntryStorageFormId { get; set; }
+        public EntryStorageForm? EntryStorageForm { get; set; }
+
         [Column("Nhap_Kho_ID")]
         [ForeignKey(nameof(Storage))]
         public int StorageId { get; set; }

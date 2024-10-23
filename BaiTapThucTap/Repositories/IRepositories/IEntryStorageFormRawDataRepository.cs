@@ -2,8 +2,9 @@
 
 namespace BaiTapThucTap.Repositories.IRepositories
 {
-    public interface IEntryStorageFormRawDataRepository
+	public interface IEntryStorageFormRawDataRepository
     {
+        public Task<List<EntryStorageFormRawData>> GetAllSortedDataAsync(int entryStorageFormId);
         public Task<List<EntryStorageFormRawData>> GetAllAsync();
         public Task<EntryStorageFormRawData?> GetAsync(int id);
         public Task CreateAsync(EntryStorageFormRawData entryStorageFormRawData);

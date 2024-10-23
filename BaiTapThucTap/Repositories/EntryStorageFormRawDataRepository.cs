@@ -26,12 +26,17 @@ namespace BaiTapThucTap.Repositories
             await applicationDbContext.SaveChangesAsync();
         }
 
-        public async Task<List<EntryStorageFormRawData>> GetAllAsync()
+        public async Task<List<EntryStorageFormRawData>> GetAllSortedDataAsync(int entryStorageFormId)
         {
-            return await applicationDbContext.EntryStorageFormRawDatas.ToListAsync();
+            return await applicationDbContext.EntryStorageFormRawDatas.Where(i => i.EntryStorageFormId == entryStorageFormId).ToListAsync();
         }
 
-        public async Task<EntryStorageFormRawData?> GetAsync(int id)
+		public async Task<List<EntryStorageFormRawData>> GetAllAsync()
+		{
+			return await applicationDbContext.EntryStorageFormRawDatas.ToListAsync();
+		}
+
+		public async Task<EntryStorageFormRawData?> GetAsync(int id)
         {
             return await applicationDbContext.EntryStorageFormRawDatas.Where(i => i.Id == id).FirstOrDefaultAsync();
         }

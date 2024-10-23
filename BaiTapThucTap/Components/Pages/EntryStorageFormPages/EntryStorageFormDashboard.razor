@@ -93,7 +93,7 @@
 			@if (!showEditFormRawData)
 			{
 				<div>
-					<button class="btn btn-secondary" @onclick="CancelEditDetailFormMode">Quay lại</button>
+					<button class="btn btn-secondary" @onclick="()=>{CancelEditDetailFormMode(); Reset();}">Quay lại</button>
 					<button class="btn btn-primary" @onclick="()=>HandleEditFormRawDataVisual(true)">Thêm sản phẩm</button>
 				</div>
 				<_EntryStorageFormRawDataVisual EntryStorageFormRawDataList="EntryStorageFormRawDataList" ProductList="ProductList" LoadEntryStorageFormRawData="LoadEntryStorageFormRawData"
@@ -162,7 +162,7 @@
 	public EntryStorageFormRawData EntryStorageFormRawData { get; set; } = new EntryStorageFormRawData();
 
 	public List<EntryStorageForm> EntryStorageFormList { get; set; }
-	public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; }
+	public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; } = new List<EntryStorageFormRawData>();
 	public List<CalculationUnit> CalculationUnitList { get; set; }
 	public List<Storage> StorageList { get; set; }
 	public List<Supplier> SupplierList { get; set; }
@@ -189,7 +189,6 @@
 			isDisabled = false;
 			EntryStorageForm.EntryStorageFormDate = DateOnly.FromDateTime(DateTime.Today);
 			await LoadEntryStorageFormList();
-			await LoadEntryStorageFormRawDataList();
 			await LoadStorageList();
 			await LoadSupplierList();
 			await LoadProductList();
@@ -213,9 +212,10 @@
 		EntryStorageFormList = await entryStorageFormRepository.GetAllAsync();
 	}
 
-	private async Task LoadEntryStorageFormRawDataList()
+	private async Task LoadEntryStorageFormRawDataList(int entryStorageFormId)
 	{
-		EntryStorageFormRawDataList = await entryStorageFormRawDataRepository.GetAllAsync();
+		EntryStorageFormRawDataList.Clear();
+		EntryStorageFormRawDataList = await entryStorageFormRawDataRepository.GetAllSortedDataAsync(entryStorageFormId);
 	}
 
 	private async Task LoadProductList()
@@ -238,8 +238,10 @@
 	{
 		isEditDetailFormMode = true;
 		await LoadEntryStorageForm(id);
-		await InvokeAsync(StateHasChanged);
+		await LoadEntryStorageFormRawDataList(EntryStorageForm.Id);
+		EntryStorageFormRawData.EntryStorageFormId = EntryStorageForm.Id;
 		EntryStorageFormRawData.StorageId = EntryStorageForm.StorageId;
+		await InvokeAsync(StateHasChanged);
 	}
 
 	private async Task CreateEntryStorageForm()
@@ -375,7 +377,7 @@
 			return;
 		}
 		await entryStorageFormRawDataRepository.CreateAsync(EntryStorageFormRawData);
-		await LoadEntryStorageFormRawDataList();
+		await LoadEntryStorageFormRawDataList(EntryStorageForm.Id);
 		HandleEditFormRawDataVisual(false);
 	}
 
@@ -389,7 +391,7 @@
 	private async Task UpdateEntryStorageFormRawData()
 	{
 		await entryStorageFormRawDataRepository.UpdateAsync(EntryStorageFormRawData);
-		await LoadEntryStorageFormRawDataList();
+		await LoadEntryStorageFormRawDataList(EntryStorageForm.Id);
 		ResetEntryStorageFormRawData();
 		HandleEditFormRawDataVisual(false);
 		isDisabled = false;
@@ -399,7 +401,7 @@
 	{
 		await LoadEntryStorageFormRawData(id);
 		await entryStorageFormRawDataRepository.DeleteAsync(EntryStorageFormRawData);
-		await LoadEntryStorageFormRawDataList();
+		await LoadEntryStorageFormRawDataList(EntryStorageForm.Id);
 		ResetEntryStorageFormRawData();
 		isDisabled = false;
 	}
@@ -420,5 +422,4 @@
 	{
 		EntryStorageFormRawData = new EntryStorageFormRawData();
 	}
-
 }
