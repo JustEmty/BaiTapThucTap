@@ -1,0 +1,27 @@
+﻿@page "/report-imported-product-dashboard"
+@inject IExportEntryStorageFormRepository exportEntryStorageFormRepository
+
+<h3>Báo cáo chi tiết hàng nhập</h3>
+
+@foreach (var item in ExportEntryStorageFormList)
+{
+    <li>@item.EntryStorageFormId</li>
+}
+
+@code {
+    public DateOnly startDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly endDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public List<DateOnly> DateOnlyList { get; set; } = new List<DateOnly>();
+    private bool isSubmitted = false;
+
+    public List<ExportEntryStorageForm> ExportEntryStorageFormList { get; set; } = new List<ExportEntryStorageForm>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ExportEntryStorageFormList = await exportEntryStorageFormRepository.GetAllAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
