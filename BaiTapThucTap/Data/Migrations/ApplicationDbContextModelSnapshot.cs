@@ -96,6 +96,12 @@ namespace BaiTapThucTap.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EntryStorageFormId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EntryStorageFormId1")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("Price")
                         .IsRequired()
                         .HasColumnType("decimal(18,2)")
@@ -115,6 +121,10 @@ namespace BaiTapThucTap.Migrations
                         .HasColumnName("Nhap_Kho_ID");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EntryStorageFormId");
+
+                    b.HasIndex("EntryStorageFormId1");
 
                     b.HasIndex("ProductId");
 
@@ -420,17 +430,26 @@ namespace BaiTapThucTap.Migrations
 
             modelBuilder.Entity("BaiTapThucTap.Models.EntryStorageFormRawData", b =>
                 {
+                    b.HasOne("BaiTapThucTap.Models.EntryStorageForm", "EntryStorageForm")
+                        .WithMany()
+                        .HasForeignKey("EntryStorageFormId")
+                        .IsRequired();
+
+                    b.HasOne("BaiTapThucTap.Models.EntryStorageForm", null)
+                        .WithMany("EntryStorageFormRawData")
+                        .HasForeignKey("EntryStorageFormId1");
+
                     b.HasOne("BaiTapThucTap.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BaiTapThucTap.Models.Storage", "Storage")
                         .WithMany()
                         .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EntryStorageForm");
 
                     b.Navigation("Product");
 
@@ -528,6 +547,11 @@ namespace BaiTapThucTap.Migrations
             modelBuilder.Entity("BaiTapThucTap.Models.CalculationUnit", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("BaiTapThucTap.Models.EntryStorageForm", b =>
+                {
+                    b.Navigation("EntryStorageFormRawData");
                 });
 
             modelBuilder.Entity("BaiTapThucTap.Models.ProductCategory", b =>
