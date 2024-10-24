@@ -110,6 +110,7 @@
     {
         try
         {
+            Supplier.SupplierName = tempValue;
             await supplierRepository.CreateAsync(Supplier);
             errorMessage = string.Empty;
         }

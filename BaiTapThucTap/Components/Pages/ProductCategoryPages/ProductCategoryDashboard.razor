@@ -114,6 +114,7 @@
     {
         try
         {
+            ProductCategory.ProductCategoryName = tempValue;
             await productCategoryRepository.CreateAsync(ProductCategory);
             errorMessage = string.Empty;
         }

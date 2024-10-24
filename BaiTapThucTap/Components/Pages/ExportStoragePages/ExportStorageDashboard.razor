@@ -140,6 +140,7 @@ else
     private string errorStorageMessage = string.Empty;
     private string errorStorageId = string.Empty;
     private string errorProductMessage = string.Empty;
+    private string storeTempValue = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -188,6 +189,7 @@ else
     private async Task LoadExportStorage(int id)
     {
         ExportStorage = await exportStorageRepository.GetAsync(id);
+        storeTempValue = ExportStorage.ExportStorageName;
     }
 
     private async Task CreateExportStorage()
@@ -251,7 +253,15 @@ else
     {
         if(ExportStorage.Id > 0)
         {
-            await UpdateXNKExportStorage();
+            try
+            {
+                await UpdateXNKExportStorage();
+            }
+            catch(DbUpdateException dbUpdateException)
+            {
+                errorStorageId = "Mã phiếu đã tồn tại vui lòng nhập mã phiếu khác";
+                ExportStorage.ExportStorageName = storeTempValue;
+            }
         }
         else
         {

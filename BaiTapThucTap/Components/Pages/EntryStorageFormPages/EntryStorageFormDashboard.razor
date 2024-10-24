@@ -28,7 +28,7 @@
 				<DataAnnotationsValidator />
 				<div class="form-group">
 					<label for="entryStorageFormId">Số phiếu nhập</label>
-					<InputText @bind-Value="EntryStorageForm.EntryStorageFormId" class="form-control" id="entryStorageFormId" placeholder="12345679abc..." />
+					<InputText @bind-Value="EntryStorageForm.EntryStorageFormId" class="form-control" id="entryStorageFormId" placeholder="12345679abc..." @oninput="ResetErrorMessage" />
 					<ValidationMessage For="@(()=>EntryStorageForm.EntryStorageFormId)" />
 					<p class="text-danger">@errorEntryStorageFormMessage</p>
 				</div>
@@ -172,6 +172,8 @@
 	private string errorStorageMessage = string.Empty;
 	private string errorSupplierMessage = string.Empty;
 	private string errorProductMessage = string.Empty;
+	private string tempValue = string.Empty;
+	private string storeTempValue = string.Empty;
 	private bool isEditHeaderFormMode;
 	private bool isEditDetailFormMode;
 	private bool showEditFormRawData;
@@ -232,6 +234,7 @@
 	{
 		Reset();
 		EntryStorageForm = await entryStorageFormRepository.GetAsync(id);
+		storeTempValue = EntryStorageForm.EntryStorageFormId;
 	}
 
 	private async void EditEntryStorageFormRawData(int id)
@@ -317,6 +320,8 @@
 			catch (DbUpdateException dbUpdateException)
 			{
 				errorEntryStorageFormMessage = "Số phiếu nhập này đã tồn tại";
+				EntryStorageForm.EntryStorageFormId = storeTempValue;
+				tempValue = string.Empty;
 				SetEditHeaderFormMode(false);
 				Reset();
 			}
@@ -392,7 +397,6 @@
 	{
 		await entryStorageFormRawDataRepository.UpdateAsync(EntryStorageFormRawData);
 		await LoadEntryStorageFormRawDataList(EntryStorageForm.Id);
-		ResetEntryStorageFormRawData();
 		HandleEditFormRawDataVisual(false);
 		isDisabled = false;
 	}
@@ -416,10 +420,16 @@
 		{
 			await CreateEntryStorageFormRawData();
 		}
+		ResetEntryStorageFormRawData();
 	}
 
 	private void ResetEntryStorageFormRawData()
 	{
 		EntryStorageFormRawData = new EntryStorageFormRawData();
+	}
+
+	private void ResetErrorMessage(ChangeEventArgs e)
+	{
+		errorEntryStorageFormMessage = string.Empty;
 	}
 }

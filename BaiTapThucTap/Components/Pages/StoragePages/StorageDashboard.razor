@@ -108,6 +108,7 @@
     {
         try
         {
+            Storage.StorageName = tempValue;
             await storageRepository.CreateAsync(Storage);
             errorMessage = string.Empty;
         }

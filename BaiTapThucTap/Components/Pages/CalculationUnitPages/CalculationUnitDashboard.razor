@@ -108,6 +108,7 @@
     {
         try
         {
+            CalculationUnit.CalculationUnitName = tempValue;
             await calculationUnitRepository.CreateAsync(CalculationUnit);
             errorMessage = string.Empty;
         }
