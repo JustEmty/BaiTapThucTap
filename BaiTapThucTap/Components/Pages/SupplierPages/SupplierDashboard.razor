@@ -54,7 +54,7 @@
                 <DataAnnotationsValidator />
                 <div class="form-group">
                     <label for="supplierName">Tên nhà cung cấp</label>
-                    <InputText @bind-Value="Supplier.SupplierName" class="form-control" id="supplierName" placeholder="Tên nhà cung cấp" />
+                    <InputText @bind-Value="tempValue" class="form-control" id="supplierName" placeholder="Tên nhà cung cấp" />
                     <ValidationMessage For="@(()=>Supplier.SupplierName)" />
                     <p class="text-danger">@errorMessage</p>
                 </div>
@@ -79,6 +79,8 @@
     public List<Supplier> SupplierList { get; set; }
 
     private string errorMessage = string.Empty;
+    private string tempValue = string.Empty;
+    private string storeTempValue = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -100,6 +102,8 @@
     {
         Reset();
         Supplier = await supplierRepository.GetAsync(id);
+        tempValue = Supplier.SupplierName;
+        storeTempValue = tempValue;
     }
 
     private async Task CreateSupplier()
@@ -107,8 +111,6 @@
         try
         {
             await supplierRepository.CreateAsync(Supplier);
-            await LoadSupplierList();
-            Reset();
             errorMessage = string.Empty;
         }
         catch (DbUpdateException dbUpdateException)
@@ -119,9 +121,17 @@
 
     private async Task UpdateSupplier()
     {
-        await supplierRepository.UpdateAsync(Supplier);
-        await LoadSupplierList();
-        Reset();
+        try
+        {
+            Supplier.SupplierName = tempValue;
+            await supplierRepository.UpdateAsync(Supplier);
+        }
+        catch (DbUpdateException dbUpdateException)
+        {
+            Supplier.SupplierName = storeTempValue;
+            errorMessage = "Tên nhà cung cấp phải là duy nhất";
+        }
+        
     }
 
     private async Task DeleteSupplier(int id)
@@ -142,6 +152,8 @@
         {
             await CreateSupplier();
         }
+        await LoadSupplierList();
+        Reset();
     }
 
     private void Reset()
