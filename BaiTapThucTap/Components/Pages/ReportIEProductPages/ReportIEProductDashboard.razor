@@ -1,4 +1,9 @@
 ﻿@page "/report-import-export-product-dashboard"
+@inject IEntryStorageFormRawDataRepository entryStorageFormRawDataRepository
+@inject IExportStorageRawDataRepository exportStorageRawDataRepository
+@inject IProductRepository productRepository
+@inject IEntryStorageFormRepository entryStorageFormRepository
+@inject IExportStorageRepository exportStorageRepository
 
 <h3>Báo cáo xuất nhập tồn</h3>
 <div class="row">
@@ -19,31 +24,32 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">Ngày xuất</th>
-                    <th scope="col">Số phiếu xuất</th>
                     <th scope="col">Mã sản phẩm</th>
                     <th scope="col">Tên sản phẩm</th>
-                    <th scope="col">SL xuất</th>
-                    <th scope="col">Đơn giá</th>
-                    <th scope="col">Trị giá</th>
+                    <th scope="col">SL Đầu Kỳ</th>
+                    <th scope="col">SL Nhập</th>
+                    <th scope="col">SL Xuất</th>
+                    <th scope="col">SL Cuối Kỳ</th>
                 </tr>
             </thead>
             <tbody>
-                @* @if (sortEntryStorageFormRawData.Count() > 0)
+                @if (ProductList.Count() > 0)
                 {
-                    @foreach (var item in sortEntryStorageFormRawData)
+                    @foreach (var entryData in groupedEntryData)
                     {
+                        var product = ProductList.FirstOrDefault(p => p.Id == entryData.ProductId);
+                        var exportData = groupedExportData.FirstOrDefault(e => e.ProductId == entryData.ProductId);
+
                         <tr>
-                            <td>@ExportStorageList?.Find(i => i.Id == item.ExportStorageId)?.ExportStorageDate</td>
-                            <td>@ExportStorageList?.Find(i => i.Id == item.ExportStorageId)?.ExportStorageName</td>
-                            <td>@item.ProductId</td>
-                            <td>@ProductList?.Find(i => i.Id == item.ProductId)?.ProductName</td>
-                            <td>@item.Quantities</td>
-                            <td>@item.Price</td>
-                            <td>@(item.Quantities * item.Price)</td>
+                            <td>@entryData.ProductId</td>
+                            <td>@(product?.ProductName ?? "Không xác định")</td>
+                            <td>@(entryData.TotalQuantity + (exportData?.TotalQuantity ?? 0))</td>
+                            <td>@entryData.TotalQuantity</td>
+                            <td>@(exportData?.TotalQuantity ?? 0)</td>
+                            <td>@(entryData.TotalQuantity + (exportData?.TotalQuantity ?? 0) - (exportData?.TotalQuantity ?? 0))</td>
                         </tr>
                     }
-                } *@
+                }
                 else
                 {
                     <tr>
@@ -59,9 +65,53 @@
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
+    public List<EntryStorageForm> EntryStorageFormList { get; set; } = new List<EntryStorageForm>();
+    public List<EntryStorageFormRawData> EntryStorageFormRawDataList { get; set; } = new List<EntryStorageFormRawData>();
+    public List<ExportStorage> ExportStorageList { get; set; } = new List<ExportStorage>();
+    public List<ExportStorageRawData> ExportStorageRawDataList { get; set; } = new List<ExportStorageRawData>();
+    public List<Product> ProductList { get; set; } = new List<Product>();
+
+    public List<EntryStorageForm> sortedEntryStorageForms { get; set; } = new List<EntryStorageForm>();
+    public List<ExportStorage> sortedExportStorageList { get; set; } = new List<ExportStorage>();
+
+    public List<dynamic> groupedEntryData { get; set; } = new List<dynamic>();
+    public List<dynamic> groupedExportData { get; set; } = new List<dynamic>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            EntryStorageFormList = await entryStorageFormRepository.GetAllAsync();
+            EntryStorageFormRawDataList = await entryStorageFormRawDataRepository.GetAllAsync();
+            ExportStorageList = await exportStorageRepository.GetAllAsync();
+            ExportStorageRawDataList = await exportStorageRawDataRepository.GetAllAsync();
+            ProductList = await productRepository.GetAllAsync();
+        }
+    }
+
     private void OnSearch()
     {
-        // sortExportStorage = ExportStorageList.Where(i => i.ExportStorageDate >= StartDate && i.ExportStorageDate <= EndDate).ToList();
-        // sortEntryStorageFormRawData = ExportStorageRawDataList.Where(i => sortExportStorage.Any(s => s.Id == i.ExportStorageId)).ToList();
+        // filter header date
+        sortedEntryStorageForms = EntryStorageFormList.Where(i => i.EntryStorageFormDate >= StartDate && i.EntryStorageFormDate <= EndDate).ToList();
+        sortedExportStorageList = ExportStorageList.Where(i => i.ExportStorageDate >= StartDate && i.ExportStorageDate <= EndDate).ToList();
+
+        // filter product in header
+        var entryStorageFormIds = sortedEntryStorageForms.Select(i => i.Id).ToList();
+        groupedEntryData = EntryStorageFormRawDataList.GroupBy(x => new { x.ProductId, x.EntryStorageFormId }).Select(g => new
+        {
+            ProductId = g.Key.ProductId,
+            EntryStorageFormId = g.Key.EntryStorageFormId,
+            TotalQuantity = g.Sum(x => x.Quantities) ?? 0, 
+            TotalPrice = g.Sum(x => x.Price) ?? 0 
+        }).Where(g => entryStorageFormIds.Contains(g.EntryStorageFormId)).ToList<dynamic>();
+
+        var exportStorageIds = sortedExportStorageList.Select(i => i.Id).ToList();
+        groupedExportData = ExportStorageRawDataList.GroupBy(x => new { x.ProductId, x.ExportStorageId }).Select(g => new
+        {
+            ProductId = g.Key.ProductId,
+            ExportStorageId = g.Key.ExportStorageId,
+            TotalQuantity = g.Sum(x => x.Quantities),
+            TotalPrice = g.Sum(x => x.Price) ?? 0
+        }).Where(g => exportStorageIds.Contains(g.ExportStorageId)).ToList<dynamic>();
     }
 }
